@@ -43,6 +43,7 @@ jsi::Value ScrollEvent::asJSIValue(jsi::Runtime& runtime) const {
   }
 
   payload.setProperty(runtime, "zoomScale", zoomScale);
+  payload.setProperty(runtime, "responderIgnoreScroll", responderIgnoreScroll); // RNC_patch
 
   return payload;
 }
