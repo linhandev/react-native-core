@@ -44,6 +44,7 @@ jsi::Value ScrollEvent::asJSIValue(jsi::Runtime& runtime) const {
 
   payload.setProperty(runtime, "zoomScale", zoomScale);
   payload.setProperty(runtime, "timestamp", timestamp * 1000);
+  payload.setProperty(runtime, "responderIgnoreScroll", responderIgnoreScroll); // RNC_patch
 
   return payload;
 }

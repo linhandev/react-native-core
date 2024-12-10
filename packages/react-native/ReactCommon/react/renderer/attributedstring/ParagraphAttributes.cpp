@@ -21,6 +21,8 @@ bool ParagraphAttributes::operator==(const ParagraphAttributes& rhs) const {
              textBreakStrategy,
              adjustsFontSizeToFit,
              includeFontPadding,
+             allowFontScaling, // RNC_patch
+             writingDirection, // RNC_patch
              android_hyphenationFrequency) ==
       std::tie(
              rhs.maximumNumberOfLines,
@@ -28,8 +30,12 @@ bool ParagraphAttributes::operator==(const ParagraphAttributes& rhs) const {
              rhs.textBreakStrategy,
              rhs.adjustsFontSizeToFit,
              rhs.includeFontPadding,
+             rhs.allowFontScaling, // RNC_patch
+             rhs.writingDirection, // RNC_patch
              rhs.android_hyphenationFrequency) &&
       floatEquality(minimumFontSize, rhs.minimumFontSize) &&
+      floatEquality(minimumFontScale, rhs.minimumFontScale) && // RNC_patch
+      floatEquality(maxFontSizeMultiplier, rhs.maxFontSizeMultiplier) && // RNC_patch
       floatEquality(maximumFontSize, rhs.maximumFontSize);
 }
 

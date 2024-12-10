@@ -14,19 +14,35 @@ add_compile_options(
         -Wpedantic
         -DLOG_TAG=\"ReactNative\")
 
+# RNC_patch: BEGIN
+set(react_nativemodule_core_platform_SRC "")
+if(DEFINED REACT_NATIVE_PLATFORM)
+    file(GLOB react_nativemodule_core_platform_SRC CONFIGURE_DEPENDS
+        "platform/${REACT_NATIVE_PLATFORM}/ReactCommon/*.cpp")
+endif()
+# RNC_patch: END
 
 file(GLOB react_nativemodule_core_SRC CONFIGURE_DEPENDS
         ReactCommon/*.cpp
-        platform/android/ReactCommon/*.cpp)
+        # platform/android/ReactCommon/*.cpp # RNC_patch
+        )
 add_library(react_nativemodule_core
         OBJECT
-        ${react_nativemodule_core_SRC})
+        ${react_nativemodule_core_SRC}
+        ${react_nativemodule_core_platform_SRC}) # RNC_patch
 
 target_include_directories(react_nativemodule_core
         PUBLIC
           ${CMAKE_CURRENT_SOURCE_DIR}
-          ${CMAKE_CURRENT_SOURCE_DIR}/platform/android/
+          # ${CMAKE_CURRENT_SOURCE_DIR}/platform/android/ # RNC_patch
         )
+
+# RNC_patch: BEGIN
+if(DEFINED REACT_NATIVE_PLATFORM)
+    target_include_directories(react_nativemodule_core PUBLIC
+        "${CMAKE_CURRENT_SOURCE_DIR}/platform/${REACT_NATIVE_PLATFORM}/")
+endif()
+# RNC_patch: END
 
 target_link_libraries(react_nativemodule_core
         fbjni
