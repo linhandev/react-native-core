@@ -70,6 +70,13 @@ class ParagraphAttributes : public DebugStringConvertible {
   Float minimumFontSize{std::numeric_limits<Float>::quiet_NaN()};
   Float maximumFontSize{std::numeric_limits<Float>::quiet_NaN()};
 
+  // RNC_patch: BEGIN  
+  WritingDirection writingDirection{};
+  bool allowFontScaling{true};
+  Float maxFontSizeMultiplier{std::numeric_limits<Float>::quiet_NaN()};
+  Float minimumFontScale{std::numeric_limits<Float>::quiet_NaN()};
+  // RNC_patch: END
+
   bool operator==(const ParagraphAttributes&) const;
   bool operator!=(const ParagraphAttributes&) const;
 
@@ -96,6 +103,7 @@ struct hash<facebook::react::ParagraphAttributes> {
         attributes.minimumFontSize,
         attributes.maximumFontSize,
         attributes.includeFontPadding,
+        attributes.minimumFontScale, // RNC_patch
         attributes.android_hyphenationFrequency);
   }
 };

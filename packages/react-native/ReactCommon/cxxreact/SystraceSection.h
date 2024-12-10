@@ -11,6 +11,12 @@
 #include <fbsystrace.h>
 #endif
 
+// RNC_PATCH: BEGIN
+#ifndef __unused
+#define __unused __attribute__((unused))
+#endif
+// RNC_PATCH: END
+
 #if defined(__APPLE__)
 // This is required so that OS_LOG_TARGET_HAS_10_15_FEATURES will be set.
 #include <os/trace_base.h>
