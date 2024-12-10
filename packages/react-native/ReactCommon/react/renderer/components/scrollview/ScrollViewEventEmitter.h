@@ -25,6 +25,7 @@ class ScrollViewEventEmitter : public ViewEventEmitter {
     EdgeInsets contentInset;
     Size containerSize;
     Float zoomScale{};
+    bool responderIgnoreScroll; // RNC_patch
   };
 
   void onScroll(const Metrics& scrollViewMetrics) const;

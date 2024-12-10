@@ -57,7 +57,8 @@ class Props : public virtual Sealable, public virtual DebugStringConvertible {
 
   std::string nativeId;
 
-#ifdef ANDROID
+// RNC_PATCH
+#ifdef RAW_PROPS_ENABLED
   folly::dynamic rawProps = folly::dynamic::object();
 #endif
 
