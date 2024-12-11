@@ -3049,6 +3049,58 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@rnoh/react-native-core@workspace:packages/react-native":
+  version: 0.0.0-use.local
+  resolution: "@rnoh/react-native-core@workspace:packages/react-native"
+  dependencies:
+    "@jest/create-cache-key-function": ^29.6.3
+    "@react-native/assets-registry": 0.77.0
+    "@react-native/codegen": 0.77.0
+    "@react-native/community-cli-plugin": 0.77.0
+    "@react-native/gradle-plugin": 0.77.0
+    "@react-native/js-polyfills": 0.77.0
+    "@react-native/normalize-colors": 0.77.0
+    "@react-native/virtualized-lists": 0.77.0
+    abort-controller: ^3.0.0
+    anser: ^1.4.9
+    ansi-regex: ^5.0.0
+    babel-jest: ^29.7.0
+    babel-plugin-syntax-hermes-parser: 0.25.1
+    base64-js: ^1.5.1
+    chalk: ^4.0.0
+    commander: ^12.0.0
+    event-target-shim: ^5.0.1
+    flow-enums-runtime: ^0.0.6
+    glob: ^7.1.1
+    invariant: ^2.2.4
+    jest-environment-node: ^29.6.3
+    jsc-android: ^250231.0.0
+    memoize-one: ^5.0.0
+    metro-runtime: ^0.81.0
+    metro-source-map: ^0.81.0
+    nullthrows: ^1.1.1
+    pretty-format: ^29.7.0
+    promise: ^8.3.0
+    react-devtools-core: ^6.0.1
+    react-refresh: ^0.14.0
+    regenerator-runtime: ^0.13.2
+    scheduler: 0.24.0-canary-efb381bbf-20230505
+    semver: ^7.1.3
+    stacktrace-parser: ^0.1.10
+    whatwg-fetch: ^3.0.0
+    ws: ^6.2.3
+    yargs: ^17.6.2
+  peerDependencies:
+    "@types/react": ^18.2.6
+    react: ^18.2.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  bin:
+    react-native-core: cli.js
+  languageName: unknown
+  linkType: soft
+
 "@rnx-kit/rn-changelog-generator@npm:^0.4.0":
   version: 0.4.1
   resolution: "@rnx-kit/rn-changelog-generator@npm:0.4.1"
@@ -10554,9 +10606,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"react-native@0.77.0, react-native@workspace:packages/react-native":
-  version: 0.0.0-use.local
-  resolution: "react-native@workspace:packages/react-native"
+"react-native@npm:0.77.0":
+  version: 0.77.0
+  resolution: "react-native@npm:0.77.0"
   dependencies:
     "@jest/create-cache-key-function": ^29.6.3
     "@react-native/assets-registry": 0.77.0
@@ -10603,8 +10655,9 @@ __metadata:
       optional: true
   bin:
     react-native: cli.js
-  languageName: unknown
-  linkType: soft
+  checksum: 331fa7c8f18ddd848d1ec8b53fc5108343597b6afc0aa354d3ee8750a9a36951fa357268891f8af9f079ce5167486c92e3b803da73848381e325f600b1c7ac5b
+  languageName: node
+  linkType: hard
 
 "react-refresh@npm:^0.14.0":
   version: 0.14.2
