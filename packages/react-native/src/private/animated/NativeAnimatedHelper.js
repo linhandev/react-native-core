@@ -19,6 +19,7 @@ import type {
 } from '../../../Libraries/Animated/NativeAnimatedModule';
 import type {EventSubscription} from '../../../Libraries/vendor/emitter/EventEmitter';
 
+import NativeAnimatedHelperDelegate from '../../../Libraries/Animated/delegates/NativeAnimatedHelperDelegate';
 import NativeAnimatedNonTurboModule from '../../../Libraries/Animated/NativeAnimatedModule';
 import NativeAnimatedTurboModule from '../../../Libraries/Animated/NativeAnimatedTurboModule';
 import NativeEventEmitter from '../../../Libraries/EventEmitter/NativeEventEmitter';
@@ -27,7 +28,6 @@ import Platform from '../../../Libraries/Utilities/Platform';
 import * as ReactNativeFeatureFlags from '../featureflags/ReactNativeFeatureFlags';
 import invariant from 'invariant';
 import nullthrows from 'nullthrows';
-import NativeAnimatedHelperDelegate from '../../../delegates/NativeAnimatedHelperDelegate/NativeAnimatedHelperDelegate';
 
 const DELEGATE = new NativeAnimatedHelperDelegate({});
 
@@ -46,11 +46,8 @@ let queueOperations = false;
 let queue: Array<() => void> = [];
 let singleOpQueue: Array<mixed> = [];
 
-const isSingleOpBatching =
-  Platform.OS === 'android' &&
-  NativeAnimatedModule?.queueAndExecuteBatchedOperations != null &&
-  ReactNativeFeatureFlags.animatedShouldUseSingleOp();
-let flushQueueImmediate = null;
+const isSingleOpBatching = DELEGATE.shouldUseSingleOpBatching();
+let flushQueueTimeout = null;
 
 const eventListenerGetValueCallbacks: {
   [number]: (value: number) => void,
@@ -61,67 +58,68 @@ const eventListenerAnimationFinishedCallbacks: {
 let globalEventEmitterGetValueListener: ?EventSubscription = null;
 let globalEventEmitterAnimationFinishedListener: ?EventSubscription = null;
 
-function createNativeOperations(): $NonMaybeType<typeof NativeAnimatedModule> {
-  const methodNames = [
-    'createAnimatedNode', // 1
-    'updateAnimatedNodeConfig', // 2
-    'getValue', // 3
-    'startListeningToAnimatedNodeValue', // 4
-    'stopListeningToAnimatedNodeValue', // 5
-    'connectAnimatedNodes', // 6
-    'disconnectAnimatedNodes', // 7
-    'startAnimatingNode', // 8
-    'stopAnimation', // 9
-    'setAnimatedNodeValue', // 10
-    'setAnimatedNodeOffset', // 11
-    'flattenAnimatedNodeOffset', // 12
-    'extractAnimatedNodeOffset', // 13
-    'connectAnimatedNodeToView', // 14
-    'disconnectAnimatedNodeFromView', // 15
-    'restoreDefaultValues', // 16
-    'dropAnimatedNode', // 17
-    'addAnimatedEventToView', // 18
-    'removeAnimatedEventFromView', // 19
-    'addListener', // 20
-    'removeListener', // 21
-  ];
-  const nativeOperations: {
-    [$Values<typeof methodNames>]: (...$ReadOnlyArray<mixed>) => void,
-  } = {};
-  if (isSingleOpBatching) {
-    for (let ii = 0, length = methodNames.length; ii < length; ii++) {
-      const methodName = methodNames[ii];
-      const operationID = ii + 1;
-      nativeOperations[methodName] = (...args) => {
-        // `singleOpQueue` is a flat array of operation IDs and arguments, which
-        // is possible because # arguments is fixed for each operation. For more
-        // details, see `NativeAnimatedModule.queueAndExecuteBatchedOperations`.
-        singleOpQueue.push(operationID, ...args);
-      };
-    }
-  } else {
-    for (let ii = 0, length = methodNames.length; ii < length; ii++) {
-      const methodName = methodNames[ii];
-      nativeOperations[methodName] = (...args) => {
-        const method = nullthrows(NativeAnimatedModule)[methodName];
-        // If queueing is explicitly on, *or* the queue has not yet
-        // been flushed, use the queue. This is to prevent operations
-        // from being executed out of order.
-        if (queueOperations || queue.length !== 0) {
-          // $FlowExpectedError[incompatible-call] - Dynamism.
-          queue.push(() => method(...args));
-        } else {
-          // $FlowExpectedError[incompatible-call] - Dynamism.
-          method(...args);
-        }
-      };
-    }
-  }
-  // $FlowExpectedError[incompatible-return] - Dynamism.
-  return nativeOperations;
-}
+// function createNativeOperations(): $NonMaybeType<typeof NativeAnimatedModule> {
+//   const methodNames = [
+//     'createAnimatedNode', // 1
+//     'updateAnimatedNodeConfig', // 2
+//     'getValue', // 3
+//     'startListeningToAnimatedNodeValue', // 4
+//     'stopListeningToAnimatedNodeValue', // 5
+//     'connectAnimatedNodes', // 6
+//     'disconnectAnimatedNodes', // 7
+//     'startAnimatingNode', // 8
+//     'stopAnimation', // 9
+//     'setAnimatedNodeValue', // 10
+//     'setAnimatedNodeOffset', // 11
+//     'flattenAnimatedNodeOffset', // 12
+//     'extractAnimatedNodeOffset', // 13
+//     'connectAnimatedNodeToView', // 14
+//     'disconnectAnimatedNodeFromView', // 15
+//     'restoreDefaultValues', // 16
+//     'dropAnimatedNode', // 17
+//     'addAnimatedEventToView', // 18
+//     'removeAnimatedEventFromView', // 19
+//     'addListener', // 20
+//     'removeListener', // 21
+//   ];
+//   const nativeOperations: {
+//     [$Values<typeof methodNames>]: (...$ReadOnlyArray<mixed>) => void,
+//   } = {};
+//   if (isSingleOpBatching) {
+//     for (let ii = 0, length = methodNames.length; ii < length; ii++) {
+//       const methodName = methodNames[ii];
+//       const operationID = ii + 1;
+//       nativeOperations[methodName] = (...args) => {
+//         // `singleOpQueue` is a flat array of operation IDs and arguments, which
+//         // is possible because # arguments is fixed for each operation. For more
+//         // details, see `NativeAnimatedModule.queueAndExecuteBatchedOperations`.
+//         singleOpQueue.push(operationID, ...args);
+//       };
+//     }
+//   } else {
+//     for (let ii = 0, length = methodNames.length; ii < length; ii++) {
+//       const methodName = methodNames[ii];
+//       nativeOperations[methodName] = (...args) => {
+//         const method = nullthrows(NativeAnimatedModule)[methodName];
+//         // If queueing is explicitly on, *or* the queue has not yet
+//         // been flushed, use the queue. This is to prevent operations
+//         // from being executed out of order.
+//         if (queueOperations || queue.length !== 0) {
+//           // $FlowExpectedError[incompatible-call] - Dynamism.
+//           queue.push(() => method(...args));
+//         } else {
+//           // $FlowExpectedError[incompatible-call] - Dynamism.
+//           method(...args);
+//         }
+//       };
+//     }
+//   }
+//   // $FlowExpectedError[incompatible-return] - Dynamism.
+//   return nativeOperations;
+// }
 
-const NativeOperations = createNativeOperations();
+// const NativeOperations = createNativeOperations();
+const NativeOperations = NativeAnimatedModule; // RNC patch
 
 /**
  * Wrappers around NativeAnimatedModule to provide flow and autocomplete support for
@@ -196,8 +194,13 @@ const API = {
         // use RCTDeviceEventEmitter. This reduces overhead of sending lots of
         // JSI functions across to native code; but also, TM infrastructure currently
         // does not support packing a function into native arrays.
-        NativeAnimatedModule?.queueAndExecuteBatchedOperations?.(singleOpQueue);
-        singleOpQueue.length = 0;
+        // NativeAnimatedModule?.queueAndExecuteBatchedOperations?.(singleOpQueue);
+        // singleOpQueue.length = 0;
+
+        // RNC_patch
+        for (let q = 0, l = singleOpQueue.length; q < l; q++) {
+          singleOpQueue[q]();
+        }
       }
     : (): void => {
         invariant(
