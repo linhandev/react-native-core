@@ -25,10 +25,12 @@ import Platform from '../Utilities/Platform';
 import NativeAnimatedNonTurboModule from './NativeAnimatedModule';
 import NativeAnimatedTurboModule from './NativeAnimatedTurboModule';
 import invariant from 'invariant';
+import NativeAnimatedHelperDelegate from '../../delegates/NativeAnimatedHelperDelegate/NativeAnimatedHelperDelegate';
+
+const DELEGATE = new NativeAnimatedHelperDelegate({});
 
 // TODO T69437152 @petetheheat - Delete this fork when Fabric ships to 100%.
-const NativeAnimatedModule =
-  NativeAnimatedNonTurboModule ?? NativeAnimatedTurboModule;
+const NativeAnimatedModule = DELEGATE.getAnimatedModule(); // RNC_patch
 
 let __nativeAnimatedNodeTagCount = 1; /* used for animated nodes */
 let __nativeAnimationIdCount = 1; /* used for started animations */
