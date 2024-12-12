@@ -16,7 +16,11 @@
   "files": [
     "ReactCommon",
     "Libraries",
-    "types"
+    "types",
+    "src",
+    "index.js",
+    "react-native.config.js",
+    "LICENSE"
   ],
   "scripts": {
     "featureflags-check": "node ./scripts/featureflags/index.js --verify-unchanged",
