@@ -14,9 +14,10 @@ import type {EventSubscription} from '../../vendor/emitter/EventEmitter';
 import RCTDeviceEventEmitter from '../../EventEmitter/RCTDeviceEventEmitter';
 import {sendAccessibilityEvent} from '../../ReactNative/RendererProxy';
 import Platform from '../../Utilities/Platform';
+// import NativeAccessibilityInfoAndroid from './NativeAccessibilityInfo'; // RNC_patch
+// import NativeAccessibilityManagerIOS from './NativeAccessibilityManager'; // RNC_patch
+import AccessibilityInfoDelegate from './delegates/AccessibilityInfoDelegate'; // RNC_patch
 import legacySendAccessibilityEvent from './legacySendAccessibilityEvent';
-import NativeAccessibilityInfoAndroid from './NativeAccessibilityInfo';
-import NativeAccessibilityManagerIOS from './NativeAccessibilityManager';
 
 // Events that are only supported on Android.
 type AccessibilityEventDefinitionsAndroid = {
@@ -70,6 +71,8 @@ const EventNames: Map<
       ['darkerSystemColorsChanged', 'darkerSystemColorsChanged'],
     ]);
 
+const DELEGATE = new AccessibilityInfoDelegate({});
+
 /**
  * Sometimes it's useful to know whether or not the device has a screen reader
  * that is currently active. The `AccessibilityInfo` API is designed for this
@@ -89,20 +92,22 @@ const AccessibilityInfo = {
    * See https://reactnative.dev/docs/accessibilityinfo#isBoldTextEnabled
    */
   isBoldTextEnabled(): Promise<boolean> {
-    if (Platform.OS === 'android') {
-      return Promise.resolve(false);
-    } else {
-      return new Promise((resolve, reject) => {
-        if (NativeAccessibilityManagerIOS != null) {
-          NativeAccessibilityManagerIOS.getCurrentBoldTextState(
-            resolve,
-            reject,
-          );
-        } else {
-          reject(null);
-        }
-      });
-    }
+    // RNC_patch
+    return DELEGATE.isBoldTextEnabled();
+    // if (Platform.OS === 'android') {
+    //   return Promise.resolve(false);
+    // } else {
+    //   return new Promise((resolve, reject) => {
+    //     if (NativeAccessibilityManagerIOS != null) {
+    //       NativeAccessibilityManagerIOS.getCurrentBoldTextState(
+    //         resolve,
+    //         reject,
+    //       );
+    //     } else {
+    //       reject(null);
+    //     }
+    //   });
+    // }
   },
 
   /**
@@ -114,26 +119,28 @@ const AccessibilityInfo = {
    * See https://reactnative.dev/docs/accessibilityinfo#isGrayscaleEnabled
    */
   isGrayscaleEnabled(): Promise<boolean> {
-    if (Platform.OS === 'android') {
-      return new Promise((resolve, reject) => {
-        if (NativeAccessibilityInfoAndroid?.isGrayscaleEnabled != null) {
-          NativeAccessibilityInfoAndroid.isGrayscaleEnabled(resolve);
-        } else {
-          reject(null);
-        }
-      });
-    } else {
-      return new Promise((resolve, reject) => {
-        if (NativeAccessibilityManagerIOS != null) {
-          NativeAccessibilityManagerIOS.getCurrentGrayscaleState(
-            resolve,
-            reject,
-          );
-        } else {
-          reject(null);
-        }
-      });
-    }
+    // RNC_patch
+    return DELEGATE.isGrayscaleEnabled();
+    // if (Platform.OS === 'android') {
+    //   return new Promise((resolve, reject) => {
+    //     if (NativeAccessibilityInfoAndroid?.isGrayscaleEnabled != null) {
+    //       NativeAccessibilityInfoAndroid.isGrayscaleEnabled(resolve);
+    //     } else {
+    //       reject(null);
+    //     }
+    //   });
+    // } else {
+    //   return new Promise((resolve, reject) => {
+    //     if (NativeAccessibilityManagerIOS != null) {
+    //       NativeAccessibilityManagerIOS.getCurrentGrayscaleState(
+    //         resolve,
+    //         reject,
+    //       );
+    //     } else {
+    //       reject(null);
+    //     }
+    //   });
+    // }
   },
 
   /**
@@ -145,26 +152,28 @@ const AccessibilityInfo = {
    * See https://reactnative.dev/docs/accessibilityinfo#isInvertColorsEnabled
    */
   isInvertColorsEnabled(): Promise<boolean> {
-    if (Platform.OS === 'android') {
-      return new Promise((resolve, reject) => {
-        if (NativeAccessibilityInfoAndroid?.isInvertColorsEnabled != null) {
-          NativeAccessibilityInfoAndroid.isInvertColorsEnabled(resolve);
-        } else {
-          reject(null);
-        }
-      });
-    } else {
-      return new Promise((resolve, reject) => {
-        if (NativeAccessibilityManagerIOS != null) {
-          NativeAccessibilityManagerIOS.getCurrentInvertColorsState(
-            resolve,
-            reject,
-          );
-        } else {
-          reject(null);
-        }
-      });
-    }
+    // RNC_patch
+    return DELEGATE.isInvertColorsEnabled();
+    // if (Platform.OS === 'android') {
+    //   return new Promise((resolve, reject) => {
+    //     if (NativeAccessibilityInfoAndroid?.isInvertColorsEnabled != null) {
+    //       NativeAccessibilityInfoAndroid.isInvertColorsEnabled(resolve);
+    //     } else {
+    //       reject(null);
+    //     }
+    //   });
+    // } else {
+    //   return new Promise((resolve, reject) => {
+    //     if (NativeAccessibilityManagerIOS != null) {
+    //       NativeAccessibilityManagerIOS.getCurrentInvertColorsState(
+    //         resolve,
+    //         reject,
+    //       );
+    //     } else {
+    //       reject(null);
+    //     }
+    //   });
+    // }
   },
 
   /**
@@ -176,24 +185,26 @@ const AccessibilityInfo = {
    * See https://reactnative.dev/docs/accessibilityinfo#isReduceMotionEnabled
    */
   isReduceMotionEnabled(): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      if (Platform.OS === 'android') {
-        if (NativeAccessibilityInfoAndroid != null) {
-          NativeAccessibilityInfoAndroid.isReduceMotionEnabled(resolve);
-        } else {
-          reject(null);
-        }
-      } else {
-        if (NativeAccessibilityManagerIOS != null) {
-          NativeAccessibilityManagerIOS.getCurrentReduceMotionState(
-            resolve,
-            reject,
-          );
-        } else {
-          reject(null);
-        }
-      }
-    });
+    // RNC_patch
+    return DELEGATE.isReduceMotionEnabled();
+    // return new Promise((resolve, reject) => {
+    //   if (Platform.OS === 'android') {
+    //     if (NativeAccessibilityInfoAndroid != null) {
+    //       NativeAccessibilityInfoAndroid.isReduceMotionEnabled(resolve);
+    //     } else {
+    //       reject(null);
+    //     }
+    //   } else {
+    //     if (NativeAccessibilityManagerIOS != null) {
+    //       NativeAccessibilityManagerIOS.getCurrentReduceMotionState(
+    //         resolve,
+    //         reject,
+    //       );
+    //     } else {
+    //       reject(null);
+    //     }
+    //   }
+    // });
   },
 
   /**
@@ -251,23 +262,25 @@ const AccessibilityInfo = {
    * See https://reactnative.dev/docs/accessibilityinfo#prefersCrossFadeTransitions
    */
   prefersCrossFadeTransitions(): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      if (Platform.OS === 'android') {
-        return Promise.resolve(false);
-      } else {
-        if (
-          NativeAccessibilityManagerIOS?.getCurrentPrefersCrossFadeTransitionsState !=
-          null
-        ) {
-          NativeAccessibilityManagerIOS.getCurrentPrefersCrossFadeTransitionsState(
-            resolve,
-            reject,
-          );
-        } else {
-          reject(null);
-        }
-      }
-    });
+    // RNC_patch
+    return DELEGATE.prefersCrossFadeTransitions();
+    // return new Promise((resolve, reject) => {
+    //   if (Platform.OS === 'android') {
+    //     return Promise.resolve(false);
+    //   } else {
+    //     if (
+    //       NativeAccessibilityManagerIOS?.getCurrentPrefersCrossFadeTransitionsState !=
+    //       null
+    //     ) {
+    //       NativeAccessibilityManagerIOS.getCurrentPrefersCrossFadeTransitionsState(
+    //         resolve,
+    //         reject,
+    //       );
+    //     } else {
+    //       reject(null);
+    //     }
+    //   }
+    // });
   },
 
   /**
@@ -279,20 +292,22 @@ const AccessibilityInfo = {
    * See https://reactnative.dev/docs/accessibilityinfo#isReduceTransparencyEnabled
    */
   isReduceTransparencyEnabled(): Promise<boolean> {
-    if (Platform.OS === 'android') {
-      return Promise.resolve(false);
-    } else {
-      return new Promise((resolve, reject) => {
-        if (NativeAccessibilityManagerIOS != null) {
-          NativeAccessibilityManagerIOS.getCurrentReduceTransparencyState(
-            resolve,
-            reject,
-          );
-        } else {
-          reject(null);
-        }
-      });
-    }
+    // RNC_patch
+    return DELEGATE.isReduceTransparencyEnabled();
+    // if (Platform.OS === 'android') {
+    //   return Promise.resolve(false);
+    // } else {
+    //   return new Promise((resolve, reject) => {
+    //     if (NativeAccessibilityManagerIOS != null) {
+    //       NativeAccessibilityManagerIOS.getCurrentReduceTransparencyState(
+    //         resolve,
+    //         reject,
+    //       );
+    //     } else {
+    //       reject(null);
+    //     }
+    //   });
+    // }
   },
 
   /**
@@ -304,24 +319,26 @@ const AccessibilityInfo = {
    * See https://reactnative.dev/docs/accessibilityinfo#isScreenReaderEnabled
    */
   isScreenReaderEnabled(): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      if (Platform.OS === 'android') {
-        if (NativeAccessibilityInfoAndroid != null) {
-          NativeAccessibilityInfoAndroid.isTouchExplorationEnabled(resolve);
-        } else {
-          reject(null);
-        }
-      } else {
-        if (NativeAccessibilityManagerIOS != null) {
-          NativeAccessibilityManagerIOS.getCurrentVoiceOverState(
-            resolve,
-            reject,
-          );
-        } else {
-          reject(null);
-        }
-      }
-    });
+    // RNC_patch
+    return DELEGATE.isScreenReaderEnabled();
+    // return new Promise((resolve, reject) => {
+    //   if (Platform.OS === 'android') {
+    //     if (NativeAccessibilityInfoAndroid != null) {
+    //       NativeAccessibilityInfoAndroid.isTouchExplorationEnabled(resolve);
+    //     } else {
+    //       reject(null);
+    //     }
+    //   } else {
+    //     if (NativeAccessibilityManagerIOS != null) {
+    //       NativeAccessibilityManagerIOS.getCurrentVoiceOverState(
+    //         resolve,
+    //         reject,
+    //       );
+    //     } else {
+    //       reject(null);
+    //     }
+    //   }
+    // });
   },
 
   /**
@@ -335,20 +352,21 @@ const AccessibilityInfo = {
    * See https://reactnative.dev/docs/accessibilityinfo/#isaccessibilityserviceenabled-android
    */
   isAccessibilityServiceEnabled(): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      if (Platform.OS === 'android') {
-        if (
-          NativeAccessibilityInfoAndroid != null &&
-          NativeAccessibilityInfoAndroid.isAccessibilityServiceEnabled != null
-        ) {
-          NativeAccessibilityInfoAndroid.isAccessibilityServiceEnabled(resolve);
-        } else {
-          reject(null);
-        }
-      } else {
-        reject(null);
-      }
-    });
+    return DELEGATE.isAccessibilityServiceEnabled();
+    // return new Promise((resolve, reject) => {
+    //   if (Platform.OS === 'android') {
+    //     if (
+    //       NativeAccessibilityInfoAndroid != null &&
+    //       NativeAccessibilityInfoAndroid.isAccessibilityServiceEnabled != null
+    //     ) {
+    //       NativeAccessibilityInfoAndroid.isAccessibilityServiceEnabled(resolve);
+    //     } else {
+    //       reject(null);
+    //     }
+    //   } else {
+    //     reject(null);
+    //   }
+    // });
   },
 
   /**
@@ -412,7 +430,9 @@ const AccessibilityInfo = {
    * See https://reactnative.dev/docs/accessibilityinfo#setaccessibilityfocus
    */
   setAccessibilityFocus(reactTag: number): void {
-    legacySendAccessibilityEvent(reactTag, 'focus');
+    // RNC_patch
+    DELEGATE.setAccessibilityFocus(reactTag);
+    // legacySendAccessibilityEvent(reactTag, 'focus');
   },
 
   /**
@@ -436,11 +456,13 @@ const AccessibilityInfo = {
    * See https://reactnative.dev/docs/accessibilityinfo#announceforaccessibility
    */
   announceForAccessibility(announcement: string): void {
-    if (Platform.OS === 'android') {
-      NativeAccessibilityInfoAndroid?.announceForAccessibility(announcement);
-    } else {
-      NativeAccessibilityManagerIOS?.announceForAccessibility(announcement);
-    }
+    // RNC_patch
+    DELEGATE.announceForAccessibility(announcement);
+    // if (Platform.OS === 'android') {
+    //   NativeAccessibilityInfoAndroid?.announceForAccessibility(announcement);
+    // } else {
+    //   NativeAccessibilityManagerIOS?.announceForAccessibility(announcement);
+    // }
   },
 
   /**
@@ -453,18 +475,19 @@ const AccessibilityInfo = {
     announcement: string,
     options: {queue?: boolean},
   ): void {
-    if (Platform.OS === 'android') {
-      NativeAccessibilityInfoAndroid?.announceForAccessibility(announcement);
-    } else {
-      if (NativeAccessibilityManagerIOS?.announceForAccessibilityWithOptions) {
-        NativeAccessibilityManagerIOS?.announceForAccessibilityWithOptions(
-          announcement,
-          options,
-        );
-      } else {
-        NativeAccessibilityManagerIOS?.announceForAccessibility(announcement);
-      }
-    }
+    DELEGATE.announceForAccessibilityWithOptions(announcement, options);
+    // if (Platform.OS === 'android') {
+    //   NativeAccessibilityInfoAndroid?.announceForAccessibility(announcement);
+    // } else {
+    //   if (NativeAccessibilityManagerIOS?.announceForAccessibilityWithOptions) {
+    //     NativeAccessibilityManagerIOS?.announceForAccessibilityWithOptions(
+    //       announcement,
+    //       options,
+    //     );
+    //   } else {
+    //     NativeAccessibilityManagerIOS?.announceForAccessibility(announcement);
+    //   }
+    // }
   },
 
   /**
@@ -473,20 +496,21 @@ const AccessibilityInfo = {
    * See https://reactnative.dev/docs/accessibilityinfo#getrecommendedtimeoutmillis
    */
   getRecommendedTimeoutMillis(originalTimeout: number): Promise<number> {
-    if (Platform.OS === 'android') {
-      return new Promise((resolve, reject) => {
-        if (NativeAccessibilityInfoAndroid?.getRecommendedTimeoutMillis) {
-          NativeAccessibilityInfoAndroid.getRecommendedTimeoutMillis(
-            originalTimeout,
-            resolve,
-          );
-        } else {
-          resolve(originalTimeout);
-        }
-      });
-    } else {
-      return Promise.resolve(originalTimeout);
-    }
+    return DELEGATE.getRecommendedTimeoutMillis(originalTimeout);
+    // if (Platform.OS === 'android') {
+    //   return new Promise((resolve, reject) => {
+    //     if (NativeAccessibilityInfoAndroid?.getRecommendedTimeoutMillis) {
+    //       NativeAccessibilityInfoAndroid.getRecommendedTimeoutMillis(
+    //         originalTimeout,
+    //         resolve,
+    //       );
+    //     } else {
+    //       resolve(originalTimeout);
+    //     }
+    //   });
+    // } else {
+    //   return Promise.resolve(originalTimeout);
+    // }
   },
 };
 
