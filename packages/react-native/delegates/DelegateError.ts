@@ -1,7 +1,7 @@
 /**
  * @format
  */
-export class DelegateError extends Error {}
+export abstract class DelegateError extends Error {}
 
 export class UnsupportedByPlatformError extends DelegateError {
   constructor() {
