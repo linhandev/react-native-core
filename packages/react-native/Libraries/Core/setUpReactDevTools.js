@@ -76,6 +76,17 @@ if (__DEV__) {
       // or the code will throw for bundles that don't have it.
       const isAppActive = () => AppState.currentState !== 'background';
 
+      // RNC_patch: added the following segment to fix issue in multi ReactInstance environment
+      if (!isAppActive()) {
+        const subscription = AppState.addEventListener('change', () => {
+          if (isAppActive()) {
+            connectToWSBasedReactDevToolsFrontend();
+            subscription.remove();
+          }
+        });
+        return;
+      }
+
       // Get hostname from development server (packager)
       const devServer = getDevServer();
       const host = devServer.bundleLoadedFromServer
