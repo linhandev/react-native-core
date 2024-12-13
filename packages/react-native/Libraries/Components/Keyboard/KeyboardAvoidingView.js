@@ -22,6 +22,7 @@ import Platform from '../../Utilities/Platform';
 import {type EventSubscription} from '../../vendor/emitter/EventEmitter';
 import AccessibilityInfo from '../AccessibilityInfo/AccessibilityInfo';
 import View from '../View/View';
+import KeyboardAvoidingViewDelegate from './delegates/KeyboardAvoidingViewDelegate';
 import Keyboard from './Keyboard';
 import * as React from 'react';
 
@@ -66,16 +67,22 @@ class KeyboardAvoidingView extends React.Component<Props, State> {
   viewRef: {current: React.ElementRef<typeof View> | null, ...};
   _initialFrameHeight: number = 0;
   _bottom: number = 0;
+  _delegate: KeyboardAvoidingViewDelegate;
 
   constructor(props: Props) {
     super(props);
     this.state = {bottom: 0};
     this.viewRef = React.createRef();
+    this._delegate = new KeyboardAvoidingViewDelegate({ getProps: () => this.props });
   }
 
   async _relativeKeyboardHeight(
     keyboardFrame: KeyboardMetrics,
   ): Promise<number> {
+    const result = this._delegate.getRelativeKeyboardHeight(keyboardFrame, this.props);
+    if (result !== null) {
+      return result;
+    }
     const frame = this._frame;
     if (!frame || !keyboardFrame) {
       return 0;
@@ -206,6 +213,7 @@ class KeyboardAvoidingView extends React.Component<Props, State> {
       ...props
     } = this.props;
     const bottomHeight = enabled === true ? this.state.bottom : 0;
+    const preparedChildren = this._delegate.prepareChildren(children, { bottomHeight });
     switch (behavior) {
       case 'height':
         let heightStyle;
@@ -225,7 +233,7 @@ class KeyboardAvoidingView extends React.Component<Props, State> {
             style={StyleSheet.compose(style, heightStyle)}
             onLayout={this._onLayout}
             {...props}>
-            {children}
+            {preparedChildren}
           </View>
         );
 
@@ -240,7 +248,7 @@ class KeyboardAvoidingView extends React.Component<Props, State> {
               style={StyleSheet.compose(contentContainerStyle, {
                 bottom: bottomHeight,
               })}>
-              {children}
+              {preparedChildren}
             </View>
           </View>
         );
@@ -252,7 +260,7 @@ class KeyboardAvoidingView extends React.Component<Props, State> {
             style={StyleSheet.compose(style, {paddingBottom: bottomHeight})}
             onLayout={this._onLayout}
             {...props}>
-            {children}
+            {preparedChildren}
           </View>
         );
 
@@ -263,7 +271,7 @@ class KeyboardAvoidingView extends React.Component<Props, State> {
             onLayout={this._onLayout}
             style={style}
             {...props}>
-            {children}
+            {preparedChildren}
           </View>
         );
     }
