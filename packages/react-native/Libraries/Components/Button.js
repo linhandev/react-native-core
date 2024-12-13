@@ -26,6 +26,7 @@ import TouchableOpacity from './Touchable/TouchableOpacity';
 import View from './View/View';
 import invariant from 'invariant';
 import * as React from 'react';
+import ButtonDelegate from "./delegates/ButtonDelegate"
 
 type ButtonProps = $ReadOnly<{|
   /**
@@ -280,6 +281,8 @@ type ButtonProps = $ReadOnly<{|
   ```
  */
 
+const DELEGATE = new ButtonDelegate({});
+
 const Touchable: typeof TouchableNativeFeedback | typeof TouchableOpacity =
   Platform.OS === 'android' ? TouchableNativeFeedback : TouchableOpacity;
 
@@ -393,6 +396,7 @@ Button.displayName = 'Button';
 
 const styles = StyleSheet.create({
   button: Platform.select({
+    default: DELEGATE.getButtonStyle(),
     ios: {},
     android: {
       elevation: 4,
@@ -405,6 +409,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     margin: 8,
     ...Platform.select({
+      default: DELEGATE.getTextStyle(),
       ios: {
         // iOS blue from https://developer.apple.com/ios/human-interface-guidelines/visual-design/color/
         color: '#007AFF',
@@ -417,6 +422,7 @@ const styles = StyleSheet.create({
     }),
   },
   buttonDisabled: Platform.select({
+    default: DELEGATE.getButtonDisabledStyle(),
     ios: {},
     android: {
       elevation: 0,
@@ -424,6 +430,7 @@ const styles = StyleSheet.create({
     },
   }),
   textDisabled: Platform.select({
+    default: DELEGATE.getTextDisabledStyle(),
     ios: {
       color: '#cdcdcd',
     },
