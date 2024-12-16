@@ -11,14 +11,16 @@
 import type {ColorValue} from '../../StyleSheet/StyleSheet';
 import type {ViewProps} from '../View/ViewPropTypes';
 
-import AndroidSwipeRefreshLayoutNativeComponent, {
-  Commands as AndroidSwipeRefreshLayoutCommands,
-} from './AndroidSwipeRefreshLayoutNativeComponent';
-import PullToRefreshViewNativeComponent, {
-  Commands as PullToRefreshCommands,
-} from './PullToRefreshViewNativeComponent';
+// RNC_patch
+// import AndroidSwipeRefreshLayoutNativeComponent, {
+//   Commands as AndroidSwipeRefreshLayoutCommands,
+// } from './AndroidSwipeRefreshLayoutNativeComponent';
+// import PullToRefreshViewNativeComponent, {
+//   Commands as PullToRefreshCommands,
+// } from './PullToRefreshViewNativeComponent';
+import RefreshControlDelegate from './delegates/RefreshControlDelegate';
 
-const Platform = require('../../Utilities/Platform');
+// const Platform = require('../../Utilities/Platform');
 const React = require('react');
 
 type IOSProps = $ReadOnly<{|
@@ -128,6 +130,13 @@ class RefreshControl extends React.Component<RefreshControlProps> {
   >;
   _lastNativeRefreshing = false;
 
+  // RNC_patch
+  _delegate: RefreshControlDelegate;
+  constructor(props: RefreshControlProps) {
+    super(props);
+    this._delegate = new RefreshControlDelegate({ getProps: () => this.props });
+  }
+
   componentDidMount() {
     this._lastNativeRefreshing = this.props.refreshing;
   }
@@ -142,42 +151,48 @@ class RefreshControl extends React.Component<RefreshControlProps> {
       this.props.refreshing !== this._lastNativeRefreshing &&
       this._nativeRef
     ) {
-      if (Platform.OS === 'android') {
-        AndroidSwipeRefreshLayoutCommands.setNativeRefreshing(
-          this._nativeRef,
-          this.props.refreshing,
-        );
-      } else {
-        PullToRefreshCommands.setNativeRefreshing(
-          this._nativeRef,
-          this.props.refreshing,
-        );
-      }
+      this._delegate.onSetNativeRefreshing(this._nativeRef, this.props.refreshing);
+      // if (Platform.OS === 'android') {
+      //   AndroidSwipeRefreshLayoutCommands.setNativeRefreshing(
+      //     this._nativeRef,
+      //     this.props.refreshing,
+      //   );
+      // } else {
+      //   PullToRefreshCommands.setNativeRefreshing(
+      //     this._nativeRef,
+      //     this.props.refreshing,
+      //   );
+      // }
       this._lastNativeRefreshing = this.props.refreshing;
     }
   }
 
   render(): React.Node {
-    if (Platform.OS === 'ios') {
-      const {enabled, colors, progressBackgroundColor, size, ...props} =
-        this.props;
-      return (
-        <PullToRefreshViewNativeComponent
-          {...props}
-          ref={this._setNativeRef}
-          onRefresh={this._onRefresh}
-        />
-      );
-    } else {
-      const {tintColor, titleColor, title, ...props} = this.props;
-      return (
-        <AndroidSwipeRefreshLayoutNativeComponent
-          {...props}
-          ref={this._setNativeRef}
-          onRefresh={this._onRefresh}
-        />
-      );
-    }
+    // RNC_patch
+    return this._delegate.renderNativeComponent({
+      setNativeRef: this._setNativeRef,
+      onRefresh: this._onRefresh,
+    });
+    // if (Platform.OS === 'ios') {
+    //   const {enabled, colors, progressBackgroundColor, size, ...props} =
+    //     this.props;
+    //   return (
+    //     <PullToRefreshViewNativeComponent
+    //       {...props}
+    //       ref={this._setNativeRef}
+    //       onRefresh={this._onRefresh}
+    //     />
+    //   );
+    // } else {
+    //   const {tintColor, titleColor, title, ...props} = this.props;
+    //   return (
+    //     <AndroidSwipeRefreshLayoutNativeComponent
+    //       {...props}
+    //       ref={this._setNativeRef}
+    //       onRefresh={this._onRefresh}
+    //     />
+    //   );
+    // }
   }
 
   _onRefresh = () => {
