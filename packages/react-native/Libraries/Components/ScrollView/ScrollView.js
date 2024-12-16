@@ -39,6 +39,7 @@ import TextInputState from '../TextInput/TextInputState';
 import View from '../View/View';
 import AndroidHorizontalScrollContentViewNativeComponent from './AndroidHorizontalScrollContentViewNativeComponent';
 import AndroidHorizontalScrollViewNativeComponent from './AndroidHorizontalScrollViewNativeComponent';
+import ScrollViewDelegate from './delegates/ScrollViewDelegate';
 import processDecelerationRate from './processDecelerationRate';
 import ScrollContentViewNativeComponent from './ScrollContentViewNativeComponent';
 import Commands from './ScrollViewCommands';
@@ -677,6 +678,7 @@ export type Props = $ReadOnly<{|
 
 type State = {|
   layoutHeight: ?number,
+  showScrollIndicator: boolean, // RNC_patch
   onScrollEmitter: ?EventEmitter<{
     scroll: [{x: number, y: number}],
   }>,
@@ -726,13 +728,16 @@ export type ScrollViewComponentStatics = $ReadOnly<{|
 class ScrollView extends React.Component<Props, State> {
   static Context: typeof ScrollViewContext = ScrollViewContext;
 
+  _delegate: ScrollViewDelegate;
+
   constructor(props: Props) {
     super(props);
-
+    // RNOH patch - resolving flashScrollIndicators command on the JS side
     this._scrollAnimatedValue = new AnimatedImplementation.Value(
       this.props.contentOffset?.y ?? 0,
     );
     this._scrollAnimatedValue.setOffset(this.props.contentInset?.top ?? 0);
+    this._delegate = new ScrollViewDelegate({});
   }
 
   _scrollAnimatedValue: AnimatedImplementation.Value;
@@ -765,6 +770,7 @@ class ScrollView extends React.Component<Props, State> {
 
   state: State = {
     layoutHeight: null,
+    showScrollIndicator: false, // RNC_patch
     onScrollEmitter: null,
   };
 
@@ -949,10 +955,15 @@ class ScrollView extends React.Component<Props, State> {
    * @platform ios
    */
   flashScrollIndicators: () => void = () => {
-    if (this._scrollView.nativeInstance == null) {
-      return;
-    }
-    Commands.flashScrollIndicators(this._scrollView.nativeInstance);
+    // RNC_patch
+    this.setState(prev => ({...prev, showScrollIndicator: true}));
+    setTimeout(() => {
+      this.setState(prev => ({...prev, showScrollIndicator: false}));
+    }, 500);
+    // if (this._scrollView.nativeInstance == null) {
+    //   return;
+    // }
+    // Commands.flashScrollIndicators(this._scrollView.nativeInstance);
   };
 
   _subscribeToOnScroll: (
@@ -1347,10 +1358,7 @@ class ScrollView extends React.Component<Props, State> {
   _handleScrollBeginDrag: (e: ScrollEvent) => void = (e: ScrollEvent) => {
     FrameRateLogger.beginScroll(); // TODO: track all scrolls after implementing onScrollEndAnimation
 
-    if (
-      Platform.OS === 'android' &&
-      this.props.keyboardDismissMode === 'on-drag'
-    ) {
+    if (this._delegate.shouldDismissKeyboardOnScrollBeginDrag(this.props)) {
       dismissKeyboard();
     }
 
@@ -1851,18 +1859,21 @@ class ScrollView extends React.Component<Props, State> {
       // default to true
       snapToEnd: this.props.snapToEnd !== false,
       // pagingEnabled is overridden by snapToInterval / snapToOffsets
-      pagingEnabled: Platform.select({
-        // on iOS, pagingEnabled must be set to false to have snapToInterval / snapToOffsets work
-        ios:
-          this.props.pagingEnabled === true &&
-          this.props.snapToInterval == null &&
-          this.props.snapToOffsets == null,
-        // on Android, pagingEnabled must be set to true to have snapToInterval / snapToOffsets work
-        android:
-          this.props.pagingEnabled === true ||
-          this.props.snapToInterval != null ||
-          this.props.snapToOffsets != null,
-      }),
+      // RNC_patch: BEGIN
+      pagingEnabled:
+        this.props.pagingEnabled === true &&
+        this.props.snapToInterval == null &&
+        this.props.snapToOffsets == null,
+      showsVerticalScrollIndicator:
+        (this.props.showsVerticalScrollIndicator ?? true) ||
+        this.state.showScrollIndicator,
+      showsHorizontalScrollIndicator:
+        (this.props.showsHorizontalScrollIndicator ?? true) ||
+        this.state.showScrollIndicator,
+      persistentScrollbar:
+        this.props.persistentScrollbar || this.state.showScrollIndicator,
+      // RNC_patch: END
+      ...this._delegate.getCustomNativeProps(this.props),
     };
 
     const {decelerationRate} = this.props;
@@ -1876,34 +1887,42 @@ class ScrollView extends React.Component<Props, State> {
     );
 
     if (refreshControl) {
-      if (Platform.OS === 'ios') {
-        // On iOS the RefreshControl is a child of the ScrollView.
-        return (
-          <NativeDirectionalScrollView {...props} ref={scrollViewRef}>
-            {refreshControl}
-            {contentContainer}
-          </NativeDirectionalScrollView>
-        );
-      } else if (Platform.OS === 'android') {
-        // On Android wrap the ScrollView with a AndroidSwipeRefreshLayout.
-        // Since the ScrollView is wrapped add the style props to the
-        // AndroidSwipeRefreshLayout and use flex: 1 for the ScrollView.
-        // Note: we should split props.style on the inner and outer props
-        // however, the ScrollView still needs the baseStyle to be scrollable
-        // $FlowFixMe[underconstrained-implicit-instantiation]
-        // $FlowFixMe[incompatible-call]
-        const {outer, inner} = splitLayoutProps(flattenStyle(props.style));
-        return React.cloneElement(
-          refreshControl,
-          {style: StyleSheet.compose(baseStyle, outer)},
-          <NativeDirectionalScrollView
-            {...props}
-            style={StyleSheet.compose(baseStyle, inner)}
-            ref={scrollViewRef}>
-            {contentContainer}
-          </NativeDirectionalScrollView>,
-        );
-      }
+      this._delegate.renderScrollViewWithRefreshControl({
+        NativeDirectionalScrollView,
+        props,
+        scrollViewRef,
+        refreshControl,
+        contentContainer,
+        baseStyle,
+      });
+      // if (Platform.OS === 'ios') {
+      //   // On iOS the RefreshControl is a child of the ScrollView.
+      //   return (
+      //     <NativeDirectionalScrollView {...props} ref={scrollViewRef}>
+      //       {refreshControl}
+      //       {contentContainer}
+      //     </NativeDirectionalScrollView>
+      //   );
+      // } else if (Platform.OS === 'android') {
+      //   // On Android wrap the ScrollView with a AndroidSwipeRefreshLayout.
+      //   // Since the ScrollView is wrapped add the style props to the
+      //   // AndroidSwipeRefreshLayout and use flex: 1 for the ScrollView.
+      //   // Note: we should split props.style on the inner and outer props
+      //   // however, the ScrollView still needs the baseStyle to be scrollable
+      //   // $FlowFixMe[underconstrained-implicit-instantiation]
+      //   // $FlowFixMe[incompatible-call]
+      //   const {outer, inner} = splitLayoutProps(flattenStyle(props.style));
+      //   return React.cloneElement(
+      //     refreshControl,
+      //     {style: StyleSheet.compose(baseStyle, outer)},
+      //     <NativeDirectionalScrollView
+      //       {...props}
+      //       style={StyleSheet.compose(baseStyle, inner)}
+      //       ref={scrollViewRef}>
+      //       {contentContainer}
+      //     </NativeDirectionalScrollView>,
+      //   );
+      // }
     }
     return (
       <NativeDirectionalScrollView {...props} ref={scrollViewRef}>
