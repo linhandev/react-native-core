@@ -12,8 +12,7 @@ import type {ColorValue} from '../../StyleSheet/StyleSheet';
 
 import processColor from '../../StyleSheet/processColor';
 import Platform from '../../Utilities/Platform';
-import NativeStatusBarManagerAndroid from './NativeStatusBarManagerAndroid';
-import NativeStatusBarManagerIOS from './NativeStatusBarManagerIOS';
+import StatusBarDelegate from './delegates/StatusBarDelegate';
 import invariant from 'invariant';
 import * as React from 'react';
 
@@ -160,6 +159,8 @@ function createStackEntry(props: any): any {
   };
 }
 
+const DELEGATE = new StatusBarDelegate({});
+
 /**
  * Component to control the app status bar.
  *
@@ -206,11 +207,7 @@ class StatusBar extends React.Component<Props> {
   static _propsStack: Array<any> = [];
 
   static _defaultProps: any = createStackEntry({
-    backgroundColor:
-      Platform.OS === 'android'
-        ? NativeStatusBarManagerAndroid.getConstants()
-            .DEFAULT_BACKGROUND_COLOR ?? 'black'
-        : 'black',
+    backgroundColor: DELEGATE.getDefaultBackgroundColor(),
     barStyle: 'default',
     translucent: false,
     hidden: false,
@@ -230,12 +227,9 @@ class StatusBar extends React.Component<Props> {
   /**
    * The current height of the status bar on the device.
    *
-   * @platform android
+   * @platform androidk
    */
-  static currentHeight: ?number =
-    Platform.OS === 'android'
-      ? NativeStatusBarManagerAndroid.getConstants().HEIGHT
-      : null;
+  static currentHeight: ?number = DELEGATE.getCurrentHeight();
 
   // Provide an imperative API as static functions of the component.
   // See the corresponding prop for more detail.
@@ -249,11 +243,12 @@ class StatusBar extends React.Component<Props> {
   static setHidden(hidden: boolean, animation?: StatusBarAnimation) {
     animation = animation || 'none';
     StatusBar._defaultProps.hidden.value = hidden;
-    if (Platform.OS === 'ios') {
-      NativeStatusBarManagerIOS.setHidden(hidden, animation);
-    } else if (Platform.OS === 'android') {
-      NativeStatusBarManagerAndroid.setHidden(hidden);
-    }
+    DELEGATE.setHidden(hidden, animation);
+    // if (Platform.OS === 'ios') {
+    //   NativeStatusBarManagerIOS.setHidden(hidden, animation);
+    // } else if (Platform.OS === 'android') {
+    //   NativeStatusBarManagerAndroid.setHidden(hidden);
+    // }
   }
 
   /**
@@ -264,11 +259,12 @@ class StatusBar extends React.Component<Props> {
   static setBarStyle(style: StatusBarStyle, animated?: boolean) {
     animated = animated || false;
     StatusBar._defaultProps.barStyle.value = style;
-    if (Platform.OS === 'ios') {
-      NativeStatusBarManagerIOS.setStyle(style, animated);
-    } else if (Platform.OS === 'android') {
-      NativeStatusBarManagerAndroid.setStyle(style);
-    }
+    DELEGATE.setBarStyle(style, animated);
+    // if (Platform.OS === 'ios') {
+    //   NativeStatusBarManagerIOS.setStyle(style, animated);
+    // } else if (Platform.OS === 'android') {
+    //   NativeStatusBarManagerAndroid.setStyle(style);
+    // }
   }
 
   /**
@@ -283,7 +279,8 @@ class StatusBar extends React.Component<Props> {
       return;
     }
     StatusBar._defaultProps.networkActivityIndicatorVisible = visible;
-    NativeStatusBarManagerIOS.setNetworkActivityIndicatorVisible(visible);
+    DELEGATE.setNetworkActivityIndicatorVisible(visible);
+    // NativeStatusBarManagerIOS.setNetworkActivityIndicatorVisible(visible);
   }
 
   /**
@@ -292,10 +289,11 @@ class StatusBar extends React.Component<Props> {
    * @param animated Animate the style change.
    */
   static setBackgroundColor(color: string, animated?: boolean): void {
-    if (Platform.OS !== 'android') {
-      console.warn('`setBackgroundColor` is only available on Android');
-      return;
-    }
+    // RNC_patch
+    // if (Platform.OS !== 'android') {
+    //   console.warn('`setBackgroundColor` is only available on Android');
+    //   return;
+    // }
     animated = animated || false;
     StatusBar._defaultProps.backgroundColor.value = color;
 
@@ -311,7 +309,7 @@ class StatusBar extends React.Component<Props> {
       'Unexpected color given for StatusBar.setBackgroundColor',
     );
 
-    NativeStatusBarManagerAndroid.setColor(processedColor, animated);
+    DELEGATE.setColor(processedColor, animated);
   }
 
   /**
@@ -319,12 +317,13 @@ class StatusBar extends React.Component<Props> {
    * @param translucent Set as translucent.
    */
   static setTranslucent(translucent: boolean) {
-    if (Platform.OS !== 'android') {
-      console.warn('`setTranslucent` is only available on Android');
-      return;
-    }
+    // RNC_patch
+    // if (Platform.OS !== 'android') {
+    //   console.warn('`setTranslucent` is only available on Android');
+    //   return;
+    // }
     StatusBar._defaultProps.translucent = translucent;
-    NativeStatusBarManagerAndroid.setTranslucent(translucent);
+    DELEGATE.setTranslucent(translucent);
   }
 
   /**
@@ -405,67 +404,67 @@ class StatusBar extends React.Component<Props> {
         StatusBar._propsStack,
         StatusBar._defaultProps,
       );
-
+      DELEGATE.updatePropsStack(oldProps, mergedProps);
       // Update the props that have changed using the merged values from the props stack.
-      if (Platform.OS === 'ios') {
-        if (
-          !oldProps ||
-          oldProps.barStyle.value !== mergedProps.barStyle.value
-        ) {
-          NativeStatusBarManagerIOS.setStyle(
-            mergedProps.barStyle.value,
-            mergedProps.barStyle.animated || false,
-          );
-        }
-        if (!oldProps || oldProps.hidden.value !== mergedProps.hidden.value) {
-          NativeStatusBarManagerIOS.setHidden(
-            mergedProps.hidden.value,
-            mergedProps.hidden.animated
-              ? mergedProps.hidden.transition
-              : 'none',
-          );
-        }
+      // if (Platform.OS === 'ios') {
+      //   if (
+      //     !oldProps ||
+      //     oldProps.barStyle.value !== mergedProps.barStyle.value
+      //   ) {
+      //     NativeStatusBarManagerIOS.setStyle(
+      //       mergedProps.barStyle.value,
+      //       mergedProps.barStyle.animated || false,
+      //     );
+      //   }
+      //   if (!oldProps || oldProps.hidden.value !== mergedProps.hidden.value) {
+      //     NativeStatusBarManagerIOS.setHidden(
+      //       mergedProps.hidden.value,
+      //       mergedProps.hidden.animated
+      //         ? mergedProps.hidden.transition
+      //         : 'none',
+      //     );
+      //   }
 
-        if (
-          !oldProps ||
-          oldProps.networkActivityIndicatorVisible !==
-            mergedProps.networkActivityIndicatorVisible
-        ) {
-          NativeStatusBarManagerIOS.setNetworkActivityIndicatorVisible(
-            mergedProps.networkActivityIndicatorVisible,
-          );
-        }
-      } else if (Platform.OS === 'android') {
-        //todo(T60684787): Add back optimization to only update bar style and
-        //background color if the new value is different from the old value.
-        NativeStatusBarManagerAndroid.setStyle(mergedProps.barStyle.value);
-        const processedColor = processColor(mergedProps.backgroundColor.value);
-        if (processedColor == null) {
-          console.warn(
-            `\`StatusBar._updatePropsStack\`: Color ${mergedProps.backgroundColor.value} parsed to null or undefined`,
-          );
-        } else {
-          invariant(
-            typeof processedColor === 'number',
-            'Unexpected color given in StatusBar._updatePropsStack',
-          );
-          NativeStatusBarManagerAndroid.setColor(
-            processedColor,
-            mergedProps.backgroundColor.animated,
-          );
-        }
-        if (!oldProps || oldProps.hidden.value !== mergedProps.hidden.value) {
-          NativeStatusBarManagerAndroid.setHidden(mergedProps.hidden.value);
-        }
-        // Activities are not translucent by default, so always set if true.
-        if (
-          !oldProps ||
-          oldProps.translucent !== mergedProps.translucent ||
-          mergedProps.translucent
-        ) {
-          NativeStatusBarManagerAndroid.setTranslucent(mergedProps.translucent);
-        }
-      }
+      //   if (
+      //     !oldProps ||
+      //     oldProps.networkActivityIndicatorVisible !==
+      //       mergedProps.networkActivityIndicatorVisible
+      //   ) {
+      //     NativeStatusBarManagerIOS.setNetworkActivityIndicatorVisible(
+      //       mergedProps.networkActivityIndicatorVisible,
+      //     );
+      //   }
+      // } else if (Platform.OS === 'android') {
+      //   //todo(T60684787): Add back optimization to only update bar style and
+      //   //background color if the new value is different from the old value.
+      //   NativeStatusBarManagerAndroid.setStyle(mergedProps.barStyle.value);
+      //   const processedColor = processColor(mergedProps.backgroundColor.value);
+      //   if (processedColor == null) {
+      //     console.warn(
+      //       `\`StatusBar._updatePropsStack\`: Color ${mergedProps.backgroundColor.value} parsed to null or undefined`,
+      //     );
+      //   } else {
+      //     invariant(
+      //       typeof processedColor === 'number',
+      //       'Unexpected color given in StatusBar._updatePropsStack',
+      //     );
+      //     NativeStatusBarManagerAndroid.setColor(
+      //       processedColor,
+      //       mergedProps.backgroundColor.animated,
+      //     );
+      //   }
+      //   if (!oldProps || oldProps.hidden.value !== mergedProps.hidden.value) {
+      //     NativeStatusBarManagerAndroid.setHidden(mergedProps.hidden.value);
+      //   }
+      //   // Activities are not translucent by default, so always set if true.
+      //   if (
+      //     !oldProps ||
+      //     oldProps.translucent !== mergedProps.translucent ||
+      //     mergedProps.translucent
+      //   ) {
+      //     NativeStatusBarManagerAndroid.setTranslucent(mergedProps.translucent);
+      //   }
+      // }
       // Update the current prop values.
       StatusBar._currentValues = mergedProps;
     });
