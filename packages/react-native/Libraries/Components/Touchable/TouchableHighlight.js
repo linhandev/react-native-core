@@ -18,7 +18,10 @@ import Pressability, {
 import {PressabilityDebugView} from '../../Pressability/PressabilityDebug';
 import StyleSheet, {type ViewStyleProp} from '../../StyleSheet/StyleSheet';
 import Platform from '../../Utilities/Platform';
+import TouchableHighlightDelegate from './delegates/TouchableHighlightDelegate';
 import * as React from 'react';
+
+const DELEGATE = new TouchableHighlightDelegate({});
 
 type AndroidProps = $ReadOnly<{|
   nextFocusDown?: ?number,
@@ -349,7 +352,9 @@ class TouchableHighlight extends React.Component<Props, State> {
         nativeID={this.props.id ?? this.props.nativeID}
         testID={this.props.testID}
         ref={this.props.hostRef}
-        {...eventHandlersWithoutBlurAndFocus}>
+        {...eventHandlersWithoutBlurAndFocus}
+        {...DELEGATE.getExtraContainerProps()}
+        >
         {React.cloneElement(child, {
           style: StyleSheet.compose(
             child.props.style,
