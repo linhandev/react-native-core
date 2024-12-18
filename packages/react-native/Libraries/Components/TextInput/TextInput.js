@@ -30,11 +30,14 @@ import Text from '../../Text/Text';
 import TextAncestor from '../../Text/TextAncestor';
 import Platform from '../../Utilities/Platform';
 import useMergeRefs from '../../Utilities/useMergeRefs';
+import TextInputDelegate from './delegates/TextInputDelegate';
 import TextInputState from './TextInputState';
 import invariant from 'invariant';
 import nullthrows from 'nullthrows';
 import * as React from 'react';
 import {useCallback, useLayoutEffect, useRef, useState} from 'react';
+
+const DELEGATE = new TextInputDelegate({});
 
 type ReactRefSetter<T> = {current: null | T, ...} | ((ref: null | T) => mixed);
 type TextInputInstance = React.ElementRef<HostComponent<mixed>> & {
@@ -1445,6 +1448,8 @@ function InternalTextInput(props: Props): React.Node {
 
   const multiline = props.multiline ?? false;
 
+  let blurOnSubmit = props.blurOnSubmit; // RNC_patch
+
   let submitBehavior: SubmitBehavior;
   if (props.submitBehavior != null) {
     // `submitBehavior` is set explicitly
@@ -1463,6 +1468,7 @@ function InternalTextInput(props: Props): React.Node {
   } else {
     // Single line
     if (props.blurOnSubmit !== false) {
+      blurOnSubmit = true; // RNC_patch: The default value is true for single-line fields
       submitBehavior = 'blurAndSubmit';
     } else {
       submitBehavior = 'submit';
@@ -1494,7 +1500,7 @@ function InternalTextInput(props: Props): React.Node {
       },
       onPressIn: onPressIn,
       onPressOut: onPressOut,
-      cancelable: Platform.OS === 'ios' ? !rejectResponderTermination : null,
+      cancelable: DELEGATE.shouldBeCancellable(rejectResponderTermination),
     }),
     [
       editable,
@@ -1560,117 +1566,155 @@ function InternalTextInput(props: Props): React.Node {
     }
   }
 
-  if (Platform.OS === 'ios') {
-    const RCTTextInputView =
-      props.multiline === true
-        ? RCTMultilineTextInputView
-        : RCTSinglelineTextInputView;
-
-    const useMultilineDefaultStyle =
-      props.multiline === true &&
-      (flattenedStyle == null ||
-        (flattenedStyle.padding == null &&
-          flattenedStyle.paddingVertical == null &&
-          flattenedStyle.paddingTop == null));
-
-    textInput = (
-      <RCTTextInputView
-        // $FlowFixMe[incompatible-type] - Figure out imperative + forward refs.
-        ref={ref}
-        {...otherProps}
-        {...eventHandlers}
-        accessibilityState={_accessibilityState}
-        accessible={accessible}
-        submitBehavior={submitBehavior}
-        caretHidden={caretHidden}
-        dataDetectorTypes={props.dataDetectorTypes}
-        focusable={tabIndex !== undefined ? !tabIndex : focusable}
-        mostRecentEventCount={mostRecentEventCount}
-        nativeID={id ?? props.nativeID}
-        onBlur={_onBlur}
-        onChange={_onChange}
-        onContentSizeChange={props.onContentSizeChange}
-        onFocus={_onFocus}
-        onScroll={_onScroll}
-        onSelectionChange={_onSelectionChange}
-        onSelectionChangeShouldSetResponder={emptyFunctionThatReturnsTrue}
-        selection={selection}
-        selectionColor={selectionColor}
-        style={StyleSheet.compose(
+  // RNC_patch
+  const _accessibilityLabelledBy =
+  props?.['aria-labelledby'] ?? props?.accessibilityLabelledBy;
+  const useMultilineDefaultStyle =
+  props.multiline === true &&
+  (_style == null ||
+    (_style.padding == null &&
+      _style.paddingVertical == null &&
+      _style.paddingTop == null));
+  textInput = DELEGATE.createNativeTextInput({
+    ref,
+    ...otherProps,
+    ...eventHandlers,
+    accessibilityState,
+    accessibilityLabelledBy: _accessibilityLabelledBy,
+    accessible,
+    submitBehavior,
+    caretHidden,
+    dataDetectorTypes: props.dataDetectorTypes,
+    focusable: tabIndex !== undefined ? !tabIndex : focusable,
+    mostRecentEventCount,
+    nativeID: id ?? props.nativeID,
+    onBlur: _onBlur,
+    onChange: _onChange,
+    onContentSizeChange: props.onContentSizeChange,
+    onFocus: _onFocus,
+    onScroll: _onScroll,
+    onSelectionChange: _onSelectionChange,
+    onSelectionChangeShouldSetResponder: emptyFunctionThatReturnsTrue,
+    selection,
+    selectionColor: selectionColor,
+    style: StyleSheet.compose(
           useMultilineDefaultStyle ? styles.multilineDefault : null,
           _style,
-        )}
-        text={text}
-      />
-    );
-  } else if (Platform.OS === 'android') {
-    const autoCapitalize = props.autoCapitalize || 'sentences';
-    const _accessibilityLabelledBy =
-      props?.['aria-labelledby'] ?? props?.accessibilityLabelledBy;
-    const placeholder = props.placeholder ?? '';
-    let children = props.children;
-    const childCount = React.Children.count(children);
-    invariant(
-      !(props.value != null && childCount),
-      'Cannot specify both value and children.',
-    );
-    if (childCount > 1) {
-      children = <Text>{children}</Text>;
-    }
-    // For consistency with iOS set cursor/selectionHandle color as selectionColor
-    const colorProps = {
-      selectionColor,
-      selectionHandleColor:
-        selectionHandleColor === undefined
-          ? selectionColor
-          : selectionHandleColor,
-      cursorColor: cursorColor === undefined ? selectionColor : cursorColor,
-    };
-    textInput = (
-      /* $FlowFixMe[prop-missing] the types for AndroidTextInput don't match up
-       * exactly with the props for TextInput. This will need to get fixed */
-      /* $FlowFixMe[incompatible-type] the types for AndroidTextInput don't
-       * match up exactly with the props for TextInput. This will need to get
-       * fixed */
-      /* $FlowFixMe[incompatible-type-arg] the types for AndroidTextInput don't
-       * match up exactly with the props for TextInput. This will need to get
-       * fixed */
-      <AndroidTextInput
-        // $FlowFixMe[incompatible-type] - Figure out imperative + forward refs.
-        ref={ref}
-        {...otherProps}
-        {...colorProps}
-        {...eventHandlers}
-        accessibilityState={_accessibilityState}
-        accessibilityLabelledBy={_accessibilityLabelledBy}
-        accessible={accessible}
-        autoCapitalize={autoCapitalize}
-        submitBehavior={submitBehavior}
-        caretHidden={caretHidden}
-        children={children}
-        disableFullscreenUI={props.disableFullscreenUI}
-        focusable={tabIndex !== undefined ? !tabIndex : focusable}
-        mostRecentEventCount={mostRecentEventCount}
-        nativeID={id ?? props.nativeID}
-        numberOfLines={props.rows ?? props.numberOfLines}
-        onBlur={_onBlur}
-        onChange={_onChange}
-        onFocus={_onFocus}
-        /* $FlowFixMe[prop-missing] the types for AndroidTextInput don't match
-         * up exactly with the props for TextInput. This will need to get fixed
-         */
-        /* $FlowFixMe[incompatible-type-arg] the types for AndroidTextInput
-         * don't match up exactly with the props for TextInput. This will need
-         * to get fixed */
-        onScroll={_onScroll}
-        onSelectionChange={_onSelectionChange}
-        placeholder={placeholder}
-        style={_style}
-        text={text}
-        textBreakStrategy={props.textBreakStrategy}
-      />
-    );
-  }
+    ),
+    text,
+    blurOnSubmit,
+  });
+// if (Platform.OS === 'ios') {
+  //   const RCTTextInputView =
+  //     props.multiline === true
+  //       ? RCTMultilineTextInputView
+  //       : RCTSinglelineTextInputView;
+
+  //   const useMultilineDefaultStyle =
+  //     props.multiline === true &&
+  //     (flattenedStyle == null ||
+  //       (flattenedStyle.padding == null &&
+  //         flattenedStyle.paddingVertical == null &&
+  //         flattenedStyle.paddingTop == null));
+
+  //   textInput = (
+  //     <RCTTextInputView
+  //       // $FlowFixMe[incompatible-type] - Figure out imperative + forward refs.
+  //       ref={ref}
+  //       {...otherProps}
+  //       {...eventHandlers}
+  //       accessibilityState={_accessibilityState}
+  //       accessible={accessible}
+  //       submitBehavior={submitBehavior}
+  //       caretHidden={caretHidden}
+  //       dataDetectorTypes={props.dataDetectorTypes}
+  //       focusable={tabIndex !== undefined ? !tabIndex : focusable}
+  //       mostRecentEventCount={mostRecentEventCount}
+  //       nativeID={id ?? props.nativeID}
+  //       onBlur={_onBlur}
+  //       onChange={_onChange}
+  //       onContentSizeChange={props.onContentSizeChange}
+  //       onFocus={_onFocus}
+  //       onScroll={_onScroll}
+  //       onSelectionChange={_onSelectionChange}
+  //       onSelectionChangeShouldSetResponder={emptyFunctionThatReturnsTrue}
+  //       selection={selection}
+  //       selectionColor={selectionColor}
+  //       style={StyleSheet.compose(
+  //         useMultilineDefaultStyle ? styles.multilineDefault : null,
+  //         _style,
+  //       )}
+  //       text={text}
+  //     />
+  //   );
+  // } else if (Platform.OS === 'android') {
+  //   const autoCapitalize = props.autoCapitalize || 'sentences';
+  //   const _accessibilityLabelledBy =
+  //     props?.['aria-labelledby'] ?? props?.accessibilityLabelledBy;
+  //   const placeholder = props.placeholder ?? '';
+  //   let children = props.children;
+  //   const childCount = React.Children.count(children);
+  //   invariant(
+  //     !(props.value != null && childCount),
+  //     'Cannot specify both value and children.',
+  //   );
+  //   if (childCount > 1) {
+  //     children = <Text>{children}</Text>;
+  //   }
+  //   // For consistency with iOS set cursor/selectionHandle color as selectionColor
+  //   const colorProps = {
+  //     selectionColor,
+  //     selectionHandleColor:
+  //       selectionHandleColor === undefined
+  //         ? selectionColor
+  //         : selectionHandleColor,
+  //     cursorColor: cursorColor === undefined ? selectionColor : cursorColor,
+  //   };
+  //   textInput = (
+  //     /* $FlowFixMe[prop-missing] the types for AndroidTextInput don't match up
+  //      * exactly with the props for TextInput. This will need to get fixed */
+  //     /* $FlowFixMe[incompatible-type] the types for AndroidTextInput don't
+  //      * match up exactly with the props for TextInput. This will need to get
+  //      * fixed */
+  //     /* $FlowFixMe[incompatible-type-arg] the types for AndroidTextInput don't
+  //      * match up exactly with the props for TextInput. This will need to get
+  //      * fixed */
+  //     <AndroidTextInput
+  //       // $FlowFixMe[incompatible-type] - Figure out imperative + forward refs.
+  //       ref={ref}
+  //       {...otherProps}
+  //       {...colorProps}
+  //       {...eventHandlers}
+  //       accessibilityState={_accessibilityState}
+  //       accessibilityLabelledBy={_accessibilityLabelledBy}
+  //       accessible={accessible}
+  //       autoCapitalize={autoCapitalize}
+  //       submitBehavior={submitBehavior}
+  //       caretHidden={caretHidden}
+  //       children={children}
+  //       disableFullscreenUI={props.disableFullscreenUI}
+  //       focusable={tabIndex !== undefined ? !tabIndex : focusable}
+  //       mostRecentEventCount={mostRecentEventCount}
+  //       nativeID={id ?? props.nativeID}
+  //       numberOfLines={props.rows ?? props.numberOfLines}
+  //       onBlur={_onBlur}
+  //       onChange={_onChange}
+  //       onFocus={_onFocus}
+  //       /* $FlowFixMe[prop-missing] the types for AndroidTextInput don't match
+  //        * up exactly with the props for TextInput. This will need to get fixed
+  //        */
+  //       /* $FlowFixMe[incompatible-type-arg] the types for AndroidTextInput
+  //        * don't match up exactly with the props for TextInput. This will need
+  //        * to get fixed */
+  //       onScroll={_onScroll}
+  //       onSelectionChange={_onSelectionChange}
+  //       placeholder={placeholder}
+  //       style={_style}
+  //       text={text}
+  //       textBreakStrategy={props.textBreakStrategy}
+  //     />
+  //   );
+  // }
   return (
     <TextAncestor.Provider value={true}>{textInput}</TextAncestor.Provider>
   );
@@ -1687,14 +1731,14 @@ const enterKeyHintToReturnTypeMap = {
 };
 
 const inputModeToKeyboardTypeMap = {
-  none: 'default',
-  text: 'default',
-  decimal: 'decimal-pad',
-  numeric: 'number-pad',
-  tel: 'phone-pad',
-  search: Platform.OS === 'ios' ? 'web-search' : 'default',
-  email: 'email-address',
-  url: 'url',
+  none: DELEGATE.getKeyboardTypeByInputMode('none'),
+  text: DELEGATE.getKeyboardTypeByInputMode('text'),
+  decimal: DELEGATE.getKeyboardTypeByInputMode('decimal'),
+  numeric: DELEGATE.getKeyboardTypeByInputMode('numeric'),
+  tel: DELEGATE.getKeyboardTypeByInputMode('tel'),
+  search: DELEGATE.getKeyboardTypeByInputMode('search'),
+  email: DELEGATE.getKeyboardTypeByInputMode('email'),
+  url: DELEGATE.getKeyboardTypeByInputMode('url'),
 };
 
 // Map HTML autocomplete values to Android autoComplete values
@@ -1793,6 +1837,14 @@ const ExportedForwardRef: React.AbstractComponent<
   },
   forwardedRef: ReactRefSetter<TextInputInstance>,
 ) {
+
+  // RNC_patch: invalid `keyboardType` prop values crash the app
+  {
+    // supported keyboard types from `textinput/conversions.h`
+    if (keyboardType && !DELEGATE.getSupportedKeyboardTypes().includes(keyboardType)) {
+      keyboardType = 'default';
+    }
+  }
   return (
     <InternalTextInput
       allowFontScaling={allowFontScaling}
@@ -1809,23 +1861,25 @@ const ExportedForwardRef: React.AbstractComponent<
         inputMode == null ? showSoftInputOnFocus : inputMode !== 'none'
       }
       autoComplete={
-        Platform.OS === 'android'
-          ? // $FlowFixMe[invalid-computed-prop]
-            // $FlowFixMe[prop-missing]
-            autoCompleteWebToAutoCompleteAndroidMap[autoComplete] ??
-            autoComplete
-          : undefined
+        DELEGATE.getNativeAutocomplete(autoComplete)
+        // Platform.OS === 'android'
+        //   ? // $FlowFixMe[invalid-computed-prop]
+        //     // $FlowFixMe[prop-missing]
+        //     autoCompleteWebToAutoCompleteAndroidMap[autoComplete] ??
+        //     autoComplete
+        // : undefined
       }
       textContentType={
-        textContentType != null
-          ? textContentType
-          : Platform.OS === 'ios' &&
-              autoComplete &&
-              autoComplete in autoCompleteWebToTextContentTypeMap
-            ? // $FlowFixMe[invalid-computed-prop]
-              // $FlowFixMe[prop-missing]
-              autoCompleteWebToTextContentTypeMap[autoComplete]
-            : textContentType
+        DELEGATE.getNativeTextContentType(textContentType, {autocomplete: autoComplete, autocompleteWebToTextContentTypeMap: autoCompleteWebToTextContentTypeMap})
+        // textContentType != null
+        //   ? textContentType
+        //   : Platform.OS === 'ios' &&
+        //       autoComplete &&
+        //       autoComplete in autoCompleteWebToTextContentTypeMap
+        //     ? // $FlowFixMe[invalid-computed-prop]
+        //       // $FlowFixMe[prop-missing]
+        //       autoCompleteWebToTextContentTypeMap[autoComplete]
+        //     : textContentType
       }
       {...restProps}
       forwardedRef={forwardedRef}
