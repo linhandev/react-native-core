@@ -20,8 +20,11 @@ import {findHostInstance_DEPRECATED} from '../../ReactNative/RendererProxy';
 import processColor from '../../StyleSheet/processColor';
 import Platform from '../../Utilities/Platform';
 import {Commands} from '../View/ViewNativeComponent';
+import TouchableNativeFeedbackDelegate from './delegates/TouchableNativeFeedbackDelegate';
 import invariant from 'invariant';
 import * as React from 'react';
+
+const DELEGATE = new TouchableNativeFeedbackDelegate({});
 
 type Props = $ReadOnly<{|
   ...React.ElementConfig<TouchableWithoutFeedback>,
@@ -331,6 +334,7 @@ class TouchableNativeFeedback extends React.Component<Props, State> {
         nextFocusUp: this.props.nextFocusUp,
         onLayout: this.props.onLayout,
         testID: this.props.testID,
+        ...DELEGATE.getExtraProps(),
       },
       ...children,
     );
