@@ -26,8 +26,11 @@ import type {
 import View from '../../Components/View/View';
 import {PressabilityDebugView} from '../../Pressability/PressabilityDebug';
 import usePressability from '../../Pressability/usePressability';
+import TouchableWithoutFeedbackDelegate from './delegates/TouchableWithoutFeedbackDelegate';
 import * as React from 'react';
 import {useMemo} from 'react';
+
+const DELEGATE = new TouchableWithoutFeedbackDelegate({});
 
 type Props = $ReadOnly<{|
   accessibilityActions?: ?$ReadOnlyArray<AccessibilityActionInfo>,
@@ -222,6 +225,7 @@ module.exports = function TouchableWithoutFeedback(props: Props): React.Node {
     accessibilityLiveRegion:
       ariaLive === 'off' ? 'none' : ariaLive ?? props.accessibilityLiveRegion,
     nativeID: props.id ?? props.nativeID,
+    ...DELEGATE.getExtraProps(),
   };
 
   for (const prop of PASSTHROUGH_PROPS) {
