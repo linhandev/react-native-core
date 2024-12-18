@@ -9,6 +9,9 @@
  */
 
 import Platform from '../Utilities/Platform';
+import Delegate from './delegates/ViewConfigIgnoreDelegate';
+
+const DELEGATE = new Delegate({});
 
 const ignoredViewConfigProps = new WeakSet<{...}>();
 
@@ -37,10 +40,11 @@ export function DynamicallyInjectedByGestureHandler<T: {...}>(object: T): T {
 export function ConditionallyIgnoredEventHandlers<T: {[name: string]: true}>(
   value: T,
 ): T | void {
-  if (Platform.OS === 'ios') {
-    return value;
-  }
-  return undefined;
+  return DELEGATE.conditionallyIgnoredEventHandlers(value);
+  // if (Platform.OS === 'ios') {
+  //   return value;
+  // }
+  // return undefined;
 }
 
 export function isIgnored(value: mixed): boolean {
