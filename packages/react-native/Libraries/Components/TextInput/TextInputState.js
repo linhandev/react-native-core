@@ -19,11 +19,13 @@ import type {
   MeasureOnSuccessCallback,
 } from '../../Renderer/shims/ReactNativeTypes';
 
-import {Commands as AndroidTextInputCommands} from '../../Components/TextInput/AndroidTextInputNativeComponent';
-import {Commands as iOSTextInputCommands} from '../../Components/TextInput/RCTSingelineTextInputNativeComponent';
+// RNC_patch: use delegate instead of directly using NativeComponent commands
+import TextInputStateDelegate from './delegates/TextInputStateDelegate';
 
 const {findNodeHandle} = require('../../ReactNative/RendererProxy');
 const Platform = require('../../Utilities/Platform');
+
+const DELEGATE = new TextInputStateDelegate({});
 
 let currentlyFocusedInputRef: ?HostInstance = null;
 const inputs = new Set<{
@@ -111,16 +113,17 @@ function focusTextInput(textField: ?HostInstance) {
       return;
     }
     focusInput(textField);
-    if (Platform.OS === 'ios') {
-      // This isn't necessarily a single line text input
-      // But commands don't actually care as long as the thing being passed in
-      // actually has a command with that name. So this should work with single
-      // and multiline text inputs. Ideally we'll merge them into one component
-      // in the future.
-      iOSTextInputCommands.focus(textField);
-    } else if (Platform.OS === 'android') {
-      AndroidTextInputCommands.focus(textField);
-    }
+    DELEGATE.focus(textField);
+    // if (Platform.OS === 'ios') {
+    //   // This isn't necessarily a single line text input
+    //   // But commands don't actually care as long as the thing being passed in
+    //   // actually has a command with that name. So this should work with single
+    //   // and multiline text inputs. Ideally we'll merge them into one component
+    //   // in the future.
+    //   iOSTextInputCommands.focus(textField);
+    // } else if (Platform.OS === 'android') {
+    //   AndroidTextInputCommands.focus(textField);
+    // }
   }
 }
 
@@ -142,16 +145,17 @@ function blurTextInput(textField: ?HostInstance) {
 
   if (currentlyFocusedInputRef === textField && textField != null) {
     blurInput(textField);
-    if (Platform.OS === 'ios') {
-      // This isn't necessarily a single line text input
-      // But commands don't actually care as long as the thing being passed in
-      // actually has a command with that name. So this should work with single
-      // and multiline text inputs. Ideally we'll merge them into one component
-      // in the future.
-      iOSTextInputCommands.blur(textField);
-    } else if (Platform.OS === 'android') {
-      AndroidTextInputCommands.blur(textField);
-    }
+    DELEGATE.blur(textField);
+    // if (Platform.OS === 'ios') {
+    //   // This isn't necessarily a single line text input
+    //   // But commands don't actually care as long as the thing being passed in
+    //   // actually has a command with that name. So this should work with single
+    //   // and multiline text inputs. Ideally we'll merge them into one component
+    //   // in the future.
+    //   iOSTextInputCommands.blur(textField);
+    // } else if (Platform.OS === 'android') {
+    //   AndroidTextInputCommands.blur(textField);
+    // }
   }
 }
 
