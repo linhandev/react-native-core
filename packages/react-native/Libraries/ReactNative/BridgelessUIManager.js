@@ -15,9 +15,20 @@ import type {UIManagerJSInterface} from '../Types/UIManagerJSInterface';
 
 import {unstable_hasComponent} from '../NativeComponent/NativeComponentRegistryUnstable';
 import defineLazyObjectProperty from '../Utilities/defineLazyObjectProperty';
-import Platform from '../Utilities/Platform';
+import Delegate from './delegates/BridgelessUIManagerDelegate';
 import {getFabricUIManager} from './FabricUIManager';
 import nullthrows from 'nullthrows';
+import Platform from '../Utilities/Platform';
+
+
+const DELEGATE = new Delegate({});
+
+// RNC_patch
+const PatchedPlatform = {
+  select(implementationByPlatformName) {
+    return implementationByPlatformName[DELEGATE.selectAndroidOrIOSImplementation()];
+  },
+};
 
 function raiseSoftError(methodName: string, details?: string): void {
   console.error(
@@ -163,7 +174,7 @@ const UIManagerJSDeprecatedPlatformAPIs = Platform.select({
   android: {},
 });
 
-const UIManagerJSPlatformAPIs = Platform.select({
+const UIManagerJSPlatformAPIs = PatchedPlatform.select({
   android: {
     getConstantsForViewManager: (viewManagerName: string): ?Object => {
       if (getConstantsForViewManager) {
