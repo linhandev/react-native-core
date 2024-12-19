@@ -9,11 +9,14 @@
  */
 
 import NativeActionSheetManager from '../ActionSheetIOS/NativeActionSheetManager';
+import Delegate from './delegates/ShareDelegate';
 import NativeShareModule from './NativeShareModule';
 
 const processColor = require('../StyleSheet/processColor').default;
 const Platform = require('../Utilities/Platform');
 const invariant = require('invariant');
+
+const DELEGATE = new Delegate({});
 
 export type ShareContent =
   | {
@@ -88,6 +91,7 @@ class Share {
       'Options must be a valid object',
     );
 
+    return DELEGATE.onShare(content, options);
     if (Platform.OS === 'android') {
       invariant(
         NativeShareModule,
@@ -102,6 +106,7 @@ class Share {
         title: content.title,
         message:
           typeof content.message === 'string' ? content.message : undefined,
+        url: typeof content.url === 'string' ? content.url : undefined, // RNC_patch
       };
 
       return NativeShareModule.share(newContent, options.dialogTitle).then(
