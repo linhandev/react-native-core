@@ -16,6 +16,7 @@ export type PlatformOSType =
   | 'macos'
   | 'windows'
   | 'web'
+  | 'harmony'
   | 'native';
 type PlatformConstants = {
   isTesting: boolean;
@@ -96,11 +97,31 @@ interface PlatformWebStatic extends PlatformStatic {
   OS: 'web';
 }
 
+export type PlatformHarmonyConstants = PlatformConstants & {
+  deviceType:
+    | 'default'
+    | 'phone'
+    | 'wearable'
+    | 'liteWearable'
+    | 'tablet'
+    | 'tv'
+    | 'car'
+    | 'smartVision';
+  osFullName: string;
+  Model: string;
+};
+
+export interface PlatformHarmonyStatic extends PlatformStatic {
+  OS: 'harmony';
+  constants: PlatformHarmonyConstants;
+  isPad: boolean;
+}
 export type Platform =
   | PlatformIOSStatic
   | PlatformAndroidStatic
   | PlatformWindowsOSStatic
   | PlatformMacOSStatic
+  | PlatformHarmonyStatic
   | PlatformWebStatic;
 
 export const Platform: Platform;
