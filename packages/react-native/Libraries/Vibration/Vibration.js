@@ -9,9 +9,10 @@
  * @jsdoc
  */
 
+import Delegate from './delegates/VibrationDelegate';
 import NativeVibration from './NativeVibration';
 
-const Platform = require('../Utilities/Platform');
+const DELEGATE = new Delegate({});
 
 /**
  * Vibration API
@@ -75,7 +76,7 @@ const Vibration = {
     pattern: number | Array<number> = _default_vibration_length,
     repeat: boolean = false,
   ) {
-    if (Platform.OS === 'android') {
+    if (DELEGATE.shouldUseAndroidImplementation()) {
       if (typeof pattern === 'number') {
         NativeVibration.vibrate(pattern);
       } else if (Array.isArray(pattern)) {
@@ -102,9 +103,10 @@ const Vibration = {
    * See https://reactnative.dev/docs/vibration#cancel
    */
   cancel: function () {
-    if (Platform.OS === 'ios') {
+    if (!DELEGATE.shouldUseAndroidImplementation()) {
       _vibrating = false;
-    } else {
+    }
+    else {
       NativeVibration.cancel();
     }
   },
