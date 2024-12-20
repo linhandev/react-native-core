@@ -25,7 +25,5 @@
   },
   "files": [
     "src"
-  ],
-  "dependencies": {},
-  "devDependencies": {}
+  ]
 }
