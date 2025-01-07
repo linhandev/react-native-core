@@ -23,7 +23,7 @@ const _cookies: {[key: string]: number, ...} = {};
 const PRINT_TO_CONSOLE: false = false; // Type as false to prevent accidentally committing `true`;
 
 export const getCurrentTimestamp: () => number =
-  global.nativeQPLTimestamp ?? (() => global.performance.now());
+  global.nativeQPLTimestamp ?? global.performance ? global.performance.now.bind(global.performance) : Date.now; // RNC_patch
 
 class PerformanceLogger implements IPerformanceLogger {
   _timespans: {[key: string]: ?Timespan} = {};
