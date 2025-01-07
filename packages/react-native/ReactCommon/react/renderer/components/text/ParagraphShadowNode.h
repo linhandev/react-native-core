@@ -44,7 +44,7 @@ class ParagraphShadowNode final : public ConcreteViewShadowNode<
     traits.set(ShadowNodeTraits::Trait::LeafYogaNode);
     traits.set(ShadowNodeTraits::Trait::MeasurableYogaNode);
 
-#ifdef ANDROID
+#ifdef FORMS_STACKING_CONTEXT // RNC_patch
     // Unsetting `FormsStackingContext` trait is essential on Android where we
     // can't mount views inside `TextView`.
     traits.unset(ShadowNodeTraits::Trait::FormsStackingContext);
