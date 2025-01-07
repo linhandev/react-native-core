@@ -7,8 +7,8 @@
 
 #pragma once
 
-#ifdef WITH_FBSYSTRACE
-#include <fbsystrace.h>
+#ifdef WITH_CUSTOM_SYSTRACE // RNC_patch
+#include <extras/SystraceSection.h> // RNC_patch
 #endif
 
 // RNC_PATCH: BEGIN
@@ -63,6 +63,8 @@ struct ConcreteSystraceSection {
   fbsystrace::FbSystraceSection m_section;
 };
 using SystraceSectionUnwrapped = ConcreteSystraceSection;
+#elif defined(WITH_CUSTOM_SYSTRACE) // RNC_patch
+using SystraceSectionUnwrapped = CustomSystraceSection; // RNC_patch
 #else
 struct DummySystraceSection {
  public:
