@@ -11,14 +11,14 @@ add_compile_options(
         -fexceptions
         -std=c++20)
 
-include(${REACT_ANDROID_DIR}/src/main/jni/first-party/jni-lib-merge/SoMerging-utils.cmake)
+# include(${REACT_ANDROID_DIR}/src/main/jni/first-party/jni-lib-merge/SoMerging-utils.cmake) # RNC_patch
 
 file(GLOB jsinspector_SRC CONFIGURE_DEPENDS *.cpp)
 # jsinspector contains singletons that hold app-global state (InspectorFlags, InspectorImpl).
 # Placing it in a shared library makes the singletons safe to use from arbitrary shared libraries
 # (even ones that don't depend on one another).
 add_library(jsinspector OBJECT ${jsinspector_SRC})
-target_merge_so(jsinspector)
+# target_merge_so(jsinspector) # RNC_patch
 
 target_include_directories(jsinspector PUBLIC ${REACT_COMMON_DIR})
 
