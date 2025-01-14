@@ -19,4 +19,5 @@ target_link_libraries(jserrorhandler
         jsi
         folly_runtime
         mapbufferjni
+        react_cxxreact # RNC_patch: JsErrorHandler imports <cxxreact/ErrorUtils.h>
 )
