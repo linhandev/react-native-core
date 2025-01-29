@@ -1,6 +1,6 @@
 {
   "name": "@rnoh/react-native-core",
-  "version": "0.77.0+unreleased-rn.0.77.0",
+  "version": "0.77.0-rn.0.77.0",
   "description": "Unofficial, platform independent core of React Native.",
   "license": "MIT",
   "keywords": [],
