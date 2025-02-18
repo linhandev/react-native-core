@@ -7,7 +7,7 @@ import {
   AlertDelegateOptions,
   AlertDelegateType,
 } from './BaseAlertDelegate';
-import {UnsupportedByPlatformError} from '../DelegateError';
+import {UnsupportedByPlatformError} from '../../../delegates/DelegateError';
 
 export default class AlertDelegate extends BaseAlertDelegate {
   alert(
