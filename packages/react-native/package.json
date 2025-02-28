@@ -1,7 +1,7 @@
 {
   "name": "react-native",
-  "version": "1000.0.0",
-  "description": "A framework for building native apps using React",
+  "version": "1.2.6",
+  "description": "A framework for building nat          ive apps using React",
   "license": "MIT",
   "repository": {
     "type": "git",
