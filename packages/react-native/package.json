@@ -17,6 +17,7 @@
     "ReactCommon",
     "Libraries",
     "types",
+    "delegates",
     "src",
     "index.js",
     "react-native.config.js",
