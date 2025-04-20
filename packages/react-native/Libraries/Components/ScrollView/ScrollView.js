@@ -1805,7 +1805,7 @@ class ScrollView extends React.Component<Props, State> {
     );
 
     if (refreshControl) {
-      this._delegate.renderScrollViewWithRefreshControl({
+      return this._delegate.renderScrollViewWithRefreshControl({
         NativeScrollView,
         props,
         scrollViewRef,
