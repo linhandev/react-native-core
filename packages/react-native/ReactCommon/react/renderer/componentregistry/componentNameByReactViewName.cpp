@@ -39,6 +39,8 @@ std::string componentNameByReactViewName(std::string viewName) {
       viewName = "ImageView";
     } else if (viewName == "RCTSinglelineTextInputView") {
       viewName = "SinglelineTextInputView";
+    } else if (viewName == "RCTMultilineTextInputView") {
+      viewName = "MultilineTextInputView";
     } else if (viewName == "RCTModalHostView") {
       viewName = "ModalHostView";
     } else if (viewName == "RCTRefreshControl") {
