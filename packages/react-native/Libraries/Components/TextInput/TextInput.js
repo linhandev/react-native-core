@@ -1313,11 +1313,7 @@ function InternalTextInput(props: Props): React.Node {
         ? props.defaultValue
         : '';
 
-  const viewCommands =
-    AndroidTextInputCommands ||
-    (props.multiline === true
-      ? RCTMultilineTextInputNativeCommands
-      : RCTSinglelineTextInputNativeCommands);
+  const viewCommands = DELEGATE.getTextInputCommands(props.multiline);
 
   const [mostRecentEventCount, setMostRecentEventCount] = useState<number>(0);
   const useTextInputStateSynchronization =

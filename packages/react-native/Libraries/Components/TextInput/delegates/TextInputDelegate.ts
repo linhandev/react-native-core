@@ -33,4 +33,8 @@ export default class TextInputDelegate extends BaseTextInputDelegate {
   override shouldBeCancellable(rejectResponderTermination: boolean): boolean | null {
     throw new UnsupportedByPlatformError();
   }
+
+  override getTextInputCommands(multiline: boolean): any {
+    throw new UnsupportedByPlatformError();
+  }
 }
