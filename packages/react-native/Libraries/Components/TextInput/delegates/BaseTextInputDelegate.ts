@@ -22,6 +22,8 @@ export abstract class BaseTextInputDelegate {
 
   abstract getSupportedKeyboardTypes(): string[];
 
+  abstract getTextInputCommands(multiline: boolean): any;
+
   getNativeAutocomplete(
     autocomplete: string | null | undefined,
   ): string | null | undefined {
