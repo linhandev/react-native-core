@@ -127,6 +127,9 @@ const RCTTextInputViewConfig = {
     placeholderTextColor: {
       process: require('../../StyleSheet/processColor').default,
     },
+    cursorColor: {
+      process: require('../../StyleSheet/processColor').default,
+    },
     clearButtonMode: true,
     keyboardType: true,
     selection: true,

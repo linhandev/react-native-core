@@ -1617,6 +1617,7 @@ function InternalTextInput(props: Props): React.Node {
     onSelectionChangeShouldSetResponder: emptyFunctionThatReturnsTrue,
     selection,
     selectionColor: selectionColor,
+    cursorColor: cursorColor === undefined ? selectionColor : cursorColor,
     style: StyleSheet.compose(
           useMultilineDefaultStyle ? styles.multilineDefault : null,
           _style,
