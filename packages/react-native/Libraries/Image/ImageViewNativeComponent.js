@@ -141,6 +141,7 @@ export const __INTERNAL_VIEW_CONFIG: PartialViewConfig =
           },
         },
         validAttributes: {
+          fadeDuration: true,
           blurRadius: true,
           capInsets: {
             diff: require('../Utilities/differ/insetsDiffer'),
