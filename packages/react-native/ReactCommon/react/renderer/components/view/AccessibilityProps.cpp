@@ -224,7 +224,7 @@ AccessibilityProps::AccessibilityProps(
     if (roleValue == nullptr || !roleValue->hasValue()) {
       role = sourceProps.role;
     } else {
-      fromRawValue(context, *roleValue, role);
+      fromRawValue(context, *roleValue, accessibilityRole);
     }
 
     if (precedentRoleValue == nullptr || !precedentRoleValue->hasValue()) {
