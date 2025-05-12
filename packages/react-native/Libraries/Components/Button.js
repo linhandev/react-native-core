@@ -363,6 +363,8 @@ const Button: component(
       ? 'no-hide-descendants'
       : importantForAccessibility;
 
+  const innerViewFocusable = ButtonDelegate.getInnerViewFocusable();
+
   return (
     <Touchable
       accessible={accessible}
@@ -388,7 +390,7 @@ const Button: component(
       // $FlowFixMe[prop-missing]
       // $FlowFixMe[incompatible-type-arg]
       ref={ref}>
-      <View style={buttonStyles}>
+      <View style={buttonStyles} focusable={innerViewFocusable}>
         <Text style={textStyles} disabled={disabled}>
           {formattedTitle}
         </Text>
