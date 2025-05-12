@@ -25,6 +25,18 @@ type NativeProps = $ReadOnly<{|
   ...ViewProps,
 
   /**
+   * Whether the pull to refresh functionality is enabled.
+   */
+  enabled?: ?boolean,
+  /**
+   * The background color of the refresh indicator.
+   */
+  progressBackgroundColor?: ?ColorValue,
+  /**
+   * Size of the refresh indicator.
+   */
+  size?: WithDefault<'default' | 'large', 'default'>,
+  /**
    * The color of the refresh indicator.
    */
   tintColor?: ?ColorValue,
