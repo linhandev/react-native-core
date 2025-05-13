@@ -363,7 +363,7 @@ const Button: component(
       ? 'no-hide-descendants'
       : importantForAccessibility;
 
-  const innerViewFocusable = ButtonDelegate.getInnerViewFocusable();
+  const innerViewFocusable = DELEGATE.getInnerViewFocusable();
 
   return (
     <Touchable
