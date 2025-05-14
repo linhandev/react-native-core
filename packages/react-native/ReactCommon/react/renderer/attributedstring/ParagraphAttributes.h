@@ -70,7 +70,7 @@ class ParagraphAttributes : public DebugStringConvertible {
   Float minimumFontSize{std::numeric_limits<Float>::quiet_NaN()};
   Float maximumFontSize{std::numeric_limits<Float>::quiet_NaN()};
 
-  // RNC_patch: BEGIN  
+  // RNC_patch: BEGIN
   WritingDirection writingDirection{};
   bool allowFontScaling{true};
   Float maxFontSizeMultiplier{std::numeric_limits<Float>::quiet_NaN()};

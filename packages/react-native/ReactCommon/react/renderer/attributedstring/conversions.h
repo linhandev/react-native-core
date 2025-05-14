@@ -846,7 +846,7 @@ inline ParagraphAttributes convertRawProp(
       "maxFontSizeMultiplier",
       sourceParagraphAttributes.maxFontSizeMultiplier,
       defaultParagraphAttributes.maxFontSizeMultiplier);
-  // RNC_PATCH: END         
+  // RNC_PATCH: END
   paragraphAttributes.includeFontPadding = convertRawProp(
       context,
       rawProps,

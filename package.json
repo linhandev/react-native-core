@@ -32,7 +32,8 @@
     "test-typescript": "dtslint packages/react-native/types",
     "test": "jest",
     "trigger-react-native-release": "node ./scripts/releases-local/trigger-react-native-release.js",
-    "update-lock": "npx yarn-deduplicate"
+    "update-lock": "npx yarn-deduplicate",
+    "generate-patch": "echo \"# last commit in this patch file is: $(git rev-parse HEAD)\" > rnc.patch && git diff --minimal -U0 cda796b88513b2be44a38ce6e2f3aff3e96436b1..HEAD >> rnc.patch && echo Created ./rnc.patch"
   },
   "workspaces": [
     "packages/*",
