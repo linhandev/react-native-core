@@ -40,6 +40,7 @@ require('./setUpAlert');
 require('./setUpNavigator');
 require('./setUpBatchedBridge');
 require('./setUpSegmentFetcher');
+require('./setUpPlatform');
 if (__DEV__) {
   require('./checkNativeVersion');
   require('./setUpDeveloperTools');
