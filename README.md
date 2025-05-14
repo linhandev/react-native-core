@@ -12,4 +12,4 @@ Various files in ReactCommon that decouple them from Android/iOS platform.
 
 ### `react-native/Libraries`
 
-This directory includes new 'delegate' files intended to be overridden by other platforms. Some original RN files were modified to call delegate methods. 
+This directory includes new 'delegate' files intended to be overridden by other platforms. Some original RN files were modified to call delegate methods.
