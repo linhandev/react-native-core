@@ -25,20 +25,7 @@ let _id: number = 0; // _id is necessary to prevent race condition.
 const _default_vibration_length = 400;
 
 function vibrateByPattern(pattern: Array<number>, repeat: boolean = false) {
-  if (_vibrating) {
-    return;
-  }
-  _vibrating = true;
-  if (pattern[0] === 0) {
-    NativeVibration.vibrate(_default_vibration_length);
-    // $FlowFixMe[reassign-const]
-    pattern = pattern.slice(1);
-  }
-  if (pattern.length === 0) {
-    _vibrating = false;
-    return;
-  }
-  setTimeout(() => vibrateScheduler(++_id, pattern, repeat, 1), pattern[0]);
+  DELEGATE.vibrateByPattern(pattern, repeat);
 }
 
 function vibrateScheduler(
@@ -47,23 +34,7 @@ function vibrateScheduler(
   repeat: boolean,
   nextIndex: number,
 ) {
-  if (!_vibrating || id !== _id) {
-    return;
-  }
-  NativeVibration.vibrate(_default_vibration_length);
-  if (nextIndex >= pattern.length) {
-    if (repeat) {
-      // $FlowFixMe[reassign-const]
-      nextIndex = 0;
-    } else {
-      _vibrating = false;
-      return;
-    }
-  }
-  setTimeout(
-    () => vibrateScheduler(id, pattern, repeat, nextIndex + 1),
-    pattern[nextIndex],
-  );
+  DELEGATE.vibrateScheduler(id, pattern, repeat, nextIndex, false);
 }
 
 const Vibration = {
@@ -103,12 +74,7 @@ const Vibration = {
    * See https://reactnative.dev/docs/vibration#cancel
    */
   cancel: function () {
-    if (!DELEGATE.shouldUseAndroidImplementation()) {
-      _vibrating = false;
-    }
-    else {
-      NativeVibration.cancel();
-    }
+    DELEGATE.cancel();
   },
 };
 
