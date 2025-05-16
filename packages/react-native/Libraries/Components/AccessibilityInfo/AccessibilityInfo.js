@@ -417,11 +417,8 @@ const AccessibilityInfo = {
     // $FlowIssue[incompatible-type] - Flow bug with unions and generics (T128099423)
     handler: (...$ElementType<AccessibilityEventDefinitions, K>) => void,
   ): EventSubscription {
-    const deviceEventName = EventNames.get(eventName);
-    return deviceEventName == null
-      ? {remove(): void {}}
-      : // $FlowFixMe[incompatible-call]
-        RCTDeviceEventEmitter.addListener(deviceEventName, handler);
+    // RNC_patch: changed implementation to support accessibilityServiceChanged
+    return RCTDeviceEventEmitter.addListener(EventNames.get(eventName) ?? eventName, handler);
   },
 
   /**
