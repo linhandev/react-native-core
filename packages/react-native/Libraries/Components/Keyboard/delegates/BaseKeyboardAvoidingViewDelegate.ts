@@ -3,7 +3,7 @@
  */
 import {ReactNode} from 'react';
 import type {KeyboardAvoidingViewProps, KeyboardMetrics} from 'react-native';
-
+import type {ViewLayout} from '../../View/ViewPropTypes';
 export type BaseKeyboardAvoidingViewDelegateContext = {
   getProps(): KeyboardAvoidingViewProps;
 };
@@ -24,5 +24,9 @@ export abstract class BaseKeyboardAvoidingViewDelegate {
     options: PrepareChildrenOptions = {},
   ): ReactNode {
     return children;
+  }
+
+  shouldTryUpdatingBottomOnLayout(oldFrame: ViewLayout, newFrame: ViewLayout) {
+    return !oldFrame;
   }
 }
