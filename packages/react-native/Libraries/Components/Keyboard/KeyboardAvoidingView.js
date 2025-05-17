@@ -133,7 +133,7 @@ class KeyboardAvoidingView extends React.Component<Props, State> {
     }
 
     // update bottom height for the first time
-    if (!oldFrame) {
+    if (this._delegate.shouldTryUpdatingBottomOnLayout(oldFrame, this._frame)) {
       await this._updateBottomIfNecessary();
     }
 
