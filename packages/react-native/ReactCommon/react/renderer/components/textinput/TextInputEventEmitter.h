@@ -52,7 +52,8 @@ class TextInputEventEmitter : public ViewEventEmitter {
 
   void dispatchTextInputContentSizeChangeEvent(
       const std::string& name,
-      const Metrics& textInputMetrics) const;
+      const Metrics& textInputMetrics,
+      bool includeSelectionState = false) const;
 };
 
 } // namespace facebook::react
