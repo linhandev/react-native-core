@@ -38,7 +38,6 @@ import * as React from 'react';
 import {useCallback, useLayoutEffect, useRef, useState} from 'react';
 
 const DELEGATE = new TextInputDelegate({});
-Platform.OS = 'ios';
 
 type ReactRefSetter<T> = {current: null | T, ...} | ((ref: null | T) => mixed);
 type TextInputInstance = HostInstance & {
