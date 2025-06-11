@@ -10,9 +10,8 @@
 
 import type {I18nManagerConstants} from './NativeI18nManager';
 
+import Delegate from './delegates/I18nManagerDelegate';
 import NativeI18nManager from './NativeI18nManager';
-
-const i18nConstants: I18nManagerConstants = getI18nManagerConstants();
 
 function getI18nManagerConstants(): I18nManagerConstants {
   if (NativeI18nManager) {
@@ -27,10 +26,10 @@ function getI18nManagerConstants(): I18nManagerConstants {
   };
 }
 
+const DELEGATE = new Delegate({constantsCallback: getI18nManagerConstants});
+
 module.exports = {
-  getConstants: (): I18nManagerConstants => {
-    return i18nConstants;
-  },
+  getConstants: DELEGATE.getConstants,
 
   allowRTL: (shouldAllow: boolean) => {
     if (!NativeI18nManager) {
@@ -56,6 +55,10 @@ module.exports = {
     NativeI18nManager.swapLeftAndRightInRTL(flipStyles);
   },
 
-  isRTL: i18nConstants.isRTL,
-  doLeftAndRightSwapInRTL: i18nConstants.doLeftAndRightSwapInRTL,
+  get isRTL(): boolean {
+    return DELEGATE.isRTL;
+  },
+  get doLeftAndRightSwapInRTL(): boolean {
+    return DELEGATE.doLeftAndRightSwapInRTL;
+  },
 };

@@ -20,4 +20,8 @@ export default class ButtonDelegate extends BaseButtonDelegate {
   getTextStyle(): TextStyle {
     return {};
   }
+
+  getInnerViewFocusable(): boolean {
+    return true;
+  }
 }

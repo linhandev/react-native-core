@@ -827,6 +827,26 @@ inline ParagraphAttributes convertRawProp(
       "maximumFontSize",
       sourceParagraphAttributes.maximumFontSize,
       defaultParagraphAttributes.maximumFontSize);
+  // RNC_PATCH: BEGIN
+  paragraphAttributes.writingDirection = convertRawProp(
+      context,
+      rawProps,
+      "writingDirection",
+      sourceParagraphAttributes.writingDirection,
+      defaultParagraphAttributes.writingDirection);
+  paragraphAttributes.allowFontScaling = convertRawProp(
+      context,
+      rawProps,
+      "allowFontScaling",
+      sourceParagraphAttributes.allowFontScaling,
+      defaultParagraphAttributes.allowFontScaling);
+  paragraphAttributes.maxFontSizeMultiplier = convertRawProp(
+      context,
+      rawProps,
+      "maxFontSizeMultiplier",
+      sourceParagraphAttributes.maxFontSizeMultiplier,
+      defaultParagraphAttributes.maxFontSizeMultiplier);
+  // RNC_PATCH: END
   paragraphAttributes.includeFontPadding = convertRawProp(
       context,
       rawProps,

@@ -1,3 +1,6 @@
+# RNOH patch - ignore the diff file
+rnc.patch
+
 .yarn
 **/*.tgz
 

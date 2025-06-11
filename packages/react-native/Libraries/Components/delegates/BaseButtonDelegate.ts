@@ -11,4 +11,5 @@ export abstract class BaseButtonDelegate {
   abstract getTextStyle(): TextStyle;
   abstract getButtonDisabledStyle(): ViewStyle;
   abstract getTextDisabledStyle(): TextStyle;
+  abstract getInnerViewFocusable(): boolean;
 }

@@ -1314,11 +1314,7 @@ function InternalTextInput(props: Props): React.Node {
         ? props.defaultValue
         : '';
 
-  const viewCommands =
-    AndroidTextInputCommands ||
-    (props.multiline === true
-      ? RCTMultilineTextInputNativeCommands
-      : RCTSinglelineTextInputNativeCommands);
+  const viewCommands = DELEGATE.getTextInputCommands(props.multiline);
 
   const [mostRecentEventCount, setMostRecentEventCount] = useState<number>(0);
   const useTextInputStateSynchronization =
@@ -1622,6 +1618,7 @@ function InternalTextInput(props: Props): React.Node {
     onSelectionChangeShouldSetResponder: emptyFunctionThatReturnsTrue,
     selection,
     selectionColor: selectionColor,
+    cursorColor: cursorColor === undefined ? selectionColor : cursorColor,
     style: StyleSheet.compose(
           useMultilineDefaultStyle ? styles.multilineDefault : null,
           _style,
