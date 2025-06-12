@@ -1587,6 +1587,7 @@ function InternalTextInput(props: Props): React.Node {
   }
 
   // RNC_patch
+  const defaultCursorColor = DELEGATE.getDefaultCursorColor(selectionColor);
   const _accessibilityLabelledBy =
   props?.['aria-labelledby'] ?? props?.accessibilityLabelledBy;
   const useMultilineDefaultStyle =
@@ -1617,7 +1618,7 @@ function InternalTextInput(props: Props): React.Node {
     onSelectionChangeShouldSetResponder: emptyFunctionThatReturnsTrue,
     selection,
     selectionColor: selectionColor,
-    cursorColor: cursorColor === undefined ? selectionColor : cursorColor,
+    cursorColor: cursorColor === undefined ? defaultCursorColor : cursorColor,
     style: StyleSheet.compose(
           useMultilineDefaultStyle ? styles.multilineDefault : null,
           _style,
