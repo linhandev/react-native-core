@@ -37,8 +37,4 @@ export default class TextInputDelegate extends BaseTextInputDelegate {
   override getTextInputCommands(multiline: boolean): any {
     throw new UnsupportedByPlatformError();
   }
-
-  override getDefaultCursorColor(selectionColor: any): any {
-    return selectionColor;
-  } 
 }
