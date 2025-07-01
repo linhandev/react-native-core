@@ -24,8 +24,6 @@ export abstract class BaseTextInputDelegate {
 
   abstract getTextInputCommands(multiline: boolean): any;
 
-  abstract getDefaultCursorColor(selectionColor: any): any;
-
   getNativeAutocomplete(
     autocomplete: string | null | undefined,
   ): string | null | undefined {
