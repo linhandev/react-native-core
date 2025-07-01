@@ -33,7 +33,7 @@
     "test": "jest",
     "trigger-react-native-release": "node ./scripts/releases-local/trigger-react-native-release.js",
     "update-lock": "npx yarn-deduplicate",
-    "generate-patch": "echo \"# last commit in this patch file is: $(git rev-parse HEAD)\" > react-native.patch && git diff --minimal -U0 cda796b88513b2be44a38ce6e2f3aff3e96436b1..HEAD >> react-native.patch && echo Created ./react-native.patch"
+    "generate-patch": "echo \"# Generated from the private React Native Core repo. Branch: $(git branch --show-current); Commit: $(git rev-parse HEAD)\" > react-native.patch && git diff --minimal -U0 cda796b88513b2be44a38ce6e2f3aff3e96436b1..HEAD >> react-native.patch && echo Created ./react-native.patch"
   },
   "workspaces": [
     "packages/*",
