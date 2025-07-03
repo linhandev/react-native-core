@@ -9,6 +9,7 @@
 
 #include <memory>
 
+#include <react/renderer/components/text/ParagraphShadowNode.h>
 #include <react/renderer/core/ReactPrimitives.h>
 #include <react/renderer/mounting/MountingCoordinator.h>
 #include <react/renderer/mounting/ShadowView.h>
@@ -46,6 +47,26 @@ class SchedulerDelegate {
    */
   virtual void schedulerDidRequestPreliminaryViewAllocation(
       const ShadowNode& shadowNode) = 0;
+
+  /*
+   * Called right after a new ParagraphShadowNode was created.
+   */
+  virtual void schedulerDidRequestPreliminaryMeasurementAllocation(
+      const ParagraphShadowNode& shadowNode) = 0;
+
+  /*
+   * Called right after a new child Node was inserted to a ParagraphShadowNode.
+   */
+  virtual void schedulerDidRequestPreliminaryMeasurementUpdate(
+      const ParagraphShadowNode& parentShadowNode,
+      const ShadowNode& childShadowNode) = 0;
+
+  /*
+   * Called right after a ParagraphShadowNode was inserted to another
+   * ShadowNode.
+   */
+  virtual void schedulerDidRequestPreliminaryMeasurementFinalization(
+      const ParagraphShadowNode& shadowNode) = 0;
 
   virtual void schedulerDidDispatchCommand(
       const ShadowView& shadowView,

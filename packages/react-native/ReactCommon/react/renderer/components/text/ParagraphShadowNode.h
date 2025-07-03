@@ -72,6 +72,8 @@ class ParagraphShadowNode final : public ConcreteViewShadowNode<
 
   Float baseline(const LayoutContext& layoutContext, Size size) const override;
 
+  YGDirection getYGDirection() const;
+
   /*
    * Internal representation of the nested content of the node in a format
    * suitable for future processing.

@@ -292,4 +292,8 @@ void ParagraphShadowNode::layout(LayoutContext layoutContext) {
   }
 }
 
+YGDirection ParagraphShadowNode::getYGDirection() const {
+  return YGNodeLayoutGetDirection(&yogaNode_);
+}
+
 } // namespace facebook::react

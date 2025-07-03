@@ -9,6 +9,7 @@
 
 #include <cxxreact/SystraceSection.h>
 #include <react/renderer/components/view/conversions.h>
+#include <stack>
 
 namespace facebook::react {
 
@@ -51,6 +52,22 @@ RootShadowNode::Unshared RootShadowNode::clone(
 
   if (layoutConstraints != getConcreteProps().layoutConstraints) {
     newRootShadowNode->dirtyLayout();
+  }
+
+  if (layoutContext.fontSizeMultiplier !=
+      getConcreteProps().layoutContext.fontSizeMultiplier) {
+    std::stack<yoga::Node*> stack;
+    stack.push(&newRootShadowNode->yogaNode_);
+    while (!stack.empty()) {
+      auto yogaNode = stack.top();
+      stack.pop();
+      if (yogaNode->getNodeType() == facebook::yoga::NodeType::Text) {
+        yogaNode->markDirtyAndPropagate();
+      }
+      for (auto child : yogaNode->getChildren()) {
+        stack.push(child);
+      }
+    }
   }
 
   return newRootShadowNode;

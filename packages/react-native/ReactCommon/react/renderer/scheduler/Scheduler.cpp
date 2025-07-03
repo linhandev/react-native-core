@@ -305,6 +305,27 @@ void Scheduler::uiManagerDidFinishTransaction(
 void Scheduler::uiManagerDidCreateShadowNode(const ShadowNode& shadowNode) {
   if (delegate_ != nullptr) {
     delegate_->schedulerDidRequestPreliminaryViewAllocation(shadowNode);
+    if (shadowNode.getComponentHandle() == ParagraphShadowNode::Handle()) {
+      delegate_->schedulerDidRequestPreliminaryMeasurementAllocation(
+          static_cast<const ParagraphShadowNode&>(shadowNode));
+    }
+  }
+}
+
+void Scheduler::uiManagerDidAppendChildNode(
+    const ShadowNode& parentShadowNode,
+    const ShadowNode& childShadowNode) {
+  if (delegate_ != nullptr) {
+    if (parentShadowNode.getComponentHandle() ==
+        ParagraphShadowNode::Handle()) {
+      delegate_->schedulerDidRequestPreliminaryMeasurementUpdate(
+          static_cast<const ParagraphShadowNode&>(parentShadowNode),
+          childShadowNode);
+    }
+    if (childShadowNode.getComponentHandle() == ParagraphShadowNode::Handle()) {
+      delegate_->schedulerDidRequestPreliminaryMeasurementFinalization(
+          static_cast<const ParagraphShadowNode&>(childShadowNode));
+    }
   }
 }
 

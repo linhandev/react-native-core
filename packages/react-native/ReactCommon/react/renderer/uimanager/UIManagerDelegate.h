@@ -34,6 +34,13 @@ class UIManagerDelegate {
   virtual void uiManagerDidCreateShadowNode(const ShadowNode& shadowNode) = 0;
 
   /*
+   * Called each time when UIManager appends a new child Node.
+   */
+  virtual void uiManagerDidAppendChildNode(
+      const ShadowNode& parentShadowNode,
+      const ShadowNode& childShadowNode) = 0;
+
+  /*
    * Called when UIManager wants to dispatch a command to the mounting layer.
    */
   virtual void uiManagerDidDispatchCommand(

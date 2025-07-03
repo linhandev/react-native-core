@@ -185,6 +185,10 @@ void UIManager::appendChild(
 
   auto& componentDescriptor = parentShadowNode->getComponentDescriptor();
   componentDescriptor.appendChild(parentShadowNode, childShadowNode);
+
+  if (delegate_ != nullptr) {
+    delegate_->uiManagerDidAppendChildNode(*parentShadowNode, *childShadowNode);
+  }
 }
 
 void UIManager::completeSurface(
