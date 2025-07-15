@@ -117,6 +117,11 @@ class ShadowNodeFamily final {
    */
   mutable std::unique_ptr<folly::dynamic> nativeProps_DEPRECATED;
 
+  /*
+   * Mutex for `nativeProps_DEPRECATED`.
+   */
+  mutable std::shared_mutex nativeProps_DEPRECATED_Mutex_;
+
   /**
    * @return tag for the ShadowNodeFamily.
    */
