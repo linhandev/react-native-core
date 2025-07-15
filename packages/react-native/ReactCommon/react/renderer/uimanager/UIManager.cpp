@@ -430,7 +430,9 @@ void UIManager::setNativeProps_DEPRECATED(
     const ShadowNode::Shared& shadowNode,
     RawProps rawProps) const {
   auto& family = shadowNode->getFamily();
-  if (family.nativeProps_DEPRECATED) {
+  {
+    std::unique_lock lock(family.nativeProps_DEPRECATED_Mutex_);
+    if (family.nativeProps_DEPRECATED) {
     // Values in `rawProps` patch (take precedence over)
     // `nativeProps_DEPRECATED`. For example, if both `nativeProps_DEPRECATED`
     // and `rawProps` contain key 'A'. Value from `rawProps` overrides what was
@@ -440,9 +442,10 @@ void UIManager::setNativeProps_DEPRECATED(
             *family.nativeProps_DEPRECATED,
             (folly::dynamic)rawProps,
             NullValueStrategy::Override));
-  } else {
-    family.nativeProps_DEPRECATED =
-        std::make_unique<folly::dynamic>((folly::dynamic)rawProps);
+    } else {
+      family.nativeProps_DEPRECATED =
+          std::make_unique<folly::dynamic>((folly::dynamic)rawProps);
+    }
   }
 
   shadowTreeRegistry_.visit(
