@@ -135,27 +135,27 @@ ShadowNode::Unshared ShadowNode::clone(
     const ShadowNodeFragment& fragment) const {
   const auto& family = *family_;
   const auto& componentDescriptor = family.componentDescriptor_;
-  if (family.nativeProps_DEPRECATED != nullptr) {
-    auto propsParserContext = PropsParserContext{family_->getSurfaceId(), {}};
-    if (fragment.props == ShadowNodeFragment::propsPlaceholder()) {
+
+  
+  if (family.nativeProps_DEPRECATED != nullptr && fragment.props == ShadowNodeFragment::propsPlaceholder()) {
+    std::shared_lock<std::shared_mutex> lock(
+        family.nativeProps_DEPRECATED_Mutex_, std::try_to_lock);
+    if (lock.owns_lock()) {
       // Clone existing `props_` with `family.nativeProps_DEPRECATED` to apply
       // previously set props via `setNativeProps` API.
+      auto propsParserContext = PropsParserContext{family_->getSurfaceId(), {}};
       auto props = componentDescriptor.cloneProps(
           propsParserContext, props_, RawProps(*family.nativeProps_DEPRECATED));
-      auto clonedNode = componentDescriptor.cloneShadowNode(
+      return componentDescriptor.cloneShadowNode(
           *this,
           {.props = props,
            .children = fragment.children,
            .state = fragment.state});
-      return clonedNode;
-    } else {
-      // TODO: We might need to merge fragment.priops with
-      // `family.nativeProps_DEPRECATED`.
-      return componentDescriptor.cloneShadowNode(*this, fragment);
     }
-  } else {
-    return componentDescriptor.cloneShadowNode(*this, fragment);
   }
+  // TODO: We might need to merge fragment.props with
+  // `family.nativeProps_DEPRECATED`.
+  return componentDescriptor.cloneShadowNode(*this, fragment);
 }
 
 ContextContainer::Shared ShadowNode::getContextContainer() const {
