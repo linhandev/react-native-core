@@ -85,6 +85,8 @@ class YogaLayoutableShadowNode : public LayoutableShadowNode {
 
   Rect getContentBounds() const;
 
+  YGDirection getYGDirection() const;
+
   static void filterRawProps(RawProps& rawProps);
 
  protected:
@@ -136,6 +138,7 @@ class YogaLayoutableShadowNode : public LayoutableShadowNode {
    * committed.
    */
   void configureYogaTree(
+      float fontSizeMultiplier,
       float pointScaleFactor,
       YGErrata defaultErrata,
       bool swapLeftAndRight);

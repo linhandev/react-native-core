@@ -456,6 +456,7 @@ void YogaLayoutableShadowNode::updateYogaProps() {
 }
 
 void YogaLayoutableShadowNode::configureYogaTree(
+    float fontSizeMultiplier,
     float pointScaleFactor,
     YGErrata defaultErrata,
     bool swapLeftAndRight) {
@@ -465,6 +466,7 @@ void YogaLayoutableShadowNode::configureYogaTree(
   YGErrata errata = resolveErrata(defaultErrata);
   YGConfigSetErrata(&yogaConfig_, errata);
   YGConfigSetPointScaleFactor(&yogaConfig_, pointScaleFactor);
+  YGConfigSetFontSizeMultiplier(&yogaConfig_, fontSizeMultiplier);
 
   // TODO: `swapLeftAndRight` modified backing props and cannot be undone
   if (swapLeftAndRight) {
@@ -481,8 +483,11 @@ void YogaLayoutableShadowNode::configureYogaTree(
     const auto& child = *yogaLayoutableChildren_[i];
     auto childLayoutMetrics = child.getLayoutMetrics();
     auto childErrata = YGConfigGetErrata(&child.yogaConfig_);
+    auto childFontSizeMultiplier =
+        YGConfigGetFontSizeMultiplier(&child.yogaConfig_);
 
     if (child.yogaTreeHasBeenConfigured_ &&
+        childFontSizeMultiplier == fontSizeMultiplier &&
         childLayoutMetrics.pointScaleFactor == pointScaleFactor &&
         childLayoutMetrics.wasLeftAndRightSwapped == swapLeftAndRight &&
         childErrata == child.resolveErrata(errata)) {
@@ -492,10 +497,13 @@ void YogaLayoutableShadowNode::configureYogaTree(
     if (doesOwn(child)) {
       auto& mutableChild = const_cast<YogaLayoutableShadowNode&>(child);
       mutableChild.configureYogaTree(
-          pointScaleFactor, child.resolveErrata(errata), swapLeftAndRight);
+          fontSizeMultiplier,
+          pointScaleFactor,
+          child.resolveErrata(errata),
+          swapLeftAndRight);
     } else {
       cloneChildInPlace(i).configureYogaTree(
-          pointScaleFactor, errata, swapLeftAndRight);
+          fontSizeMultiplier, pointScaleFactor, errata, swapLeftAndRight);
     }
   }
 }
@@ -593,6 +601,7 @@ void YogaLayoutableShadowNode::layoutTree(
   {
     SystraceSection s2("YogaLayoutableShadowNode::configureYogaTree");
     configureYogaTree(
+        layoutContext.fontSizeMultiplier,
         layoutContext.pointScaleFactor,
         YGErrataAll /*defaultErrata*/,
         swapLeftAndRight);
@@ -784,6 +793,10 @@ Rect YogaLayoutableShadowNode::getContentBounds() const {
   return contentBounds;
 }
 
+YGDirection YogaLayoutableShadowNode::getYGDirection() const {
+  return YGNodeLayoutGetDirection(&yogaNode_);
+}
+
 /*static*/ void YogaLayoutableShadowNode::filterRawProps(RawProps& rawProps) {
   if (ReactNativeFeatureFlags::excludeYogaFromRawProps()) {
     // TODO: this shouldn't live in RawProps
@@ -878,6 +891,8 @@ yoga::Config& YogaLayoutableShadowNode::initializeYogaConfig(
   YGConfigSetCloneNodeFunc(
       &config, YogaLayoutableShadowNode::yogaNodeCloneCallbackConnector);
   if (previousConfig != nullptr) {
+    YGConfigSetFontSizeMultiplier(
+        &config, YGConfigGetFontSizeMultiplier(previousConfig));
     YGConfigSetPointScaleFactor(
         &config, YGConfigGetPointScaleFactor(previousConfig));
     YGConfigSetErrata(&config, YGConfigGetErrata(previousConfig));

@@ -18,6 +18,7 @@
 #include <react/renderer/uimanager/UIManagerBinding.h>
 #include <react/renderer/uimanager/UIManagerCommitHook.h>
 #include <react/renderer/uimanager/UIManagerMountHook.h>
+#include <react/renderer/uimanager/UIManagerNodeOperationHook.h>
 
 #include <glog/logging.h>
 
@@ -107,6 +108,10 @@ std::shared_ptr<ShadowNode> UIManager::createNode(
     leakChecker_->uiManagerDidCreateShadowNodeFamily(family);
   }
 
+  for (auto* nodeOperationHook : nodeOperationHooks_) {
+    nodeOperationHook->uiManagerDidCreateShadowNode(*shadowNode);
+  }
+
   return shadowNode;
 }
 
@@ -175,6 +180,11 @@ std::shared_ptr<ShadowNode> UIManager::cloneNode(
           .runtimeShadowNodeReference = false,
       });
 
+  for (auto* nodeOperationHook : nodeOperationHooks_) {
+    nodeOperationHook->uiManagerDidCloneShadowNode(
+        shadowNode, *clonedShadowNode);
+  }
+
   return clonedShadowNode;
 }
 
@@ -185,6 +195,11 @@ void UIManager::appendChild(
 
   auto& componentDescriptor = parentShadowNode->getComponentDescriptor();
   componentDescriptor.appendChild(parentShadowNode, childShadowNode);
+
+  for (auto* nodeOperationHook : nodeOperationHooks_) {
+    nodeOperationHook->uiManagerDidAppendChildNode(
+        *parentShadowNode, *childShadowNode);
+  }
 }
 
 void UIManager::completeSurface(
@@ -609,6 +624,28 @@ void UIManager::unregisterMountHook(UIManagerMountHook& mountHook) {
   auto iterator = std::find(mountHooks_.begin(), mountHooks_.end(), &mountHook);
   react_native_assert(iterator != mountHooks_.end());
   mountHooks_.erase(iterator);
+}
+
+void UIManager::registerNodeOperationHook(
+    UIManagerNodeOperationHook& nodeOperationHook) {
+  std::unique_lock lock(nodeOperationHookMutex_);
+  react_native_assert(
+      std::find(
+          nodeOperationHooks_.begin(),
+          nodeOperationHooks_.end(),
+          &nodeOperationHook) == nodeOperationHooks_.end());
+  nodeOperationHooks_.push_back(&nodeOperationHook);
+}
+
+void UIManager::unregisterNodeOperationHook(
+    UIManagerNodeOperationHook& nodeOperationHook) {
+  std::unique_lock lock(nodeOperationHookMutex_);
+  auto iterator = std::find(
+      nodeOperationHooks_.begin(),
+      nodeOperationHooks_.end(),
+      &nodeOperationHook);
+  react_native_assert(iterator != nodeOperationHooks_.end());
+  nodeOperationHooks_.erase(iterator);
 }
 
 #pragma mark - ShadowTreeDelegate

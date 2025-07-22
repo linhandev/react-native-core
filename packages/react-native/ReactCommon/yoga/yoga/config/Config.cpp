@@ -12,12 +12,15 @@
 namespace facebook::yoga {
 
 bool configUpdateInvalidatesLayout(
+    NodeType nodeType,
     const Config& oldConfig,
     const Config& newConfig) {
   return oldConfig.getErrata() != newConfig.getErrata() ||
       oldConfig.getEnabledExperiments() != newConfig.getEnabledExperiments() ||
       oldConfig.getPointScaleFactor() != newConfig.getPointScaleFactor() ||
-      oldConfig.useWebDefaults() != newConfig.useWebDefaults();
+      oldConfig.useWebDefaults() != newConfig.useWebDefaults() ||
+      (nodeType == NodeType::Text &&
+       oldConfig.getFontSizeMultiplier() != newConfig.getFontSizeMultiplier());
 }
 
 void Config::setUseWebDefaults(bool useWebDefaults) {
@@ -83,6 +86,17 @@ void Config::setPointScaleFactor(float pointScaleFactor) {
 
 float Config::getPointScaleFactor() const {
   return pointScaleFactor_;
+}
+
+void Config::setFontSizeMultiplier(float fontSizeMultiplier) {
+  if (fontSizeMultiplier_ != fontSizeMultiplier) {
+    fontSizeMultiplier_ = fontSizeMultiplier;
+    version_++;
+  }
+}
+
+float Config::getFontSizeMultiplier() const {
+  return fontSizeMultiplier_;
 }
 
 void Config::setContext(void* context) {

@@ -60,6 +60,18 @@ YG_EXPORT void YGConfigSetUseWebDefaults(YGConfigRef config, bool enabled);
 YG_EXPORT bool YGConfigGetUseWebDefaults(YGConfigConstRef config);
 
 /**
+ * Set the font size multiplier.
+ */
+YG_EXPORT void YGConfigSetFontSizeMultiplier(
+    YGConfigRef config,
+    float fontSizeMultiplier);
+
+/**
+ * Get the currently set font size multiplier.
+ */
+YG_EXPORT float YGConfigGetFontSizeMultiplier(YGConfigConstRef config);
+
+/**
  * Yoga will by default round final layout positions and dimensions to the
  * nearst point. `pointScaleFactor` controls the density of the grid used for
  * layout rounding (e.g. to round to the closest display pixel).

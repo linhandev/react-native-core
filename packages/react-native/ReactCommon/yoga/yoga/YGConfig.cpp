@@ -47,6 +47,21 @@ float YGConfigGetPointScaleFactor(const YGConfigConstRef config) {
   return resolveRef(config)->getPointScaleFactor();
 }
 
+void YGConfigSetFontSizeMultiplier(
+    const YGConfigRef config,
+    const float fontSizeMultiplier) {
+  yoga::assertFatalWithConfig(
+      resolveRef(config),
+      fontSizeMultiplier >= 0.0f,
+      "Size multiplier should not be less than zero");
+
+  resolveRef(config)->setFontSizeMultiplier(fontSizeMultiplier);
+}
+
+float YGConfigGetFontSizeMultiplier(const YGConfigConstRef config) {
+  return resolveRef(config)->getFontSizeMultiplier();
+}
+
 void YGConfigSetErrata(YGConfigRef config, YGErrata errata) {
   resolveRef(config)->setErrata(scopedEnum(errata));
 }

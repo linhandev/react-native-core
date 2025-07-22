@@ -36,6 +36,7 @@ namespace facebook::react {
 class UIManagerBinding;
 class UIManagerCommitHook;
 class UIManagerMountHook;
+class UIManagerNodeOperationHook;
 
 class UIManager final : public ShadowTreeDelegate {
  public:
@@ -92,6 +93,13 @@ class UIManager final : public ShadowTreeDelegate {
    */
   void registerMountHook(UIManagerMountHook& mountHook);
   void unregisterMountHook(UIManagerMountHook& mountHook);
+
+  /*
+   * Registers and unregisters a node operation hook.
+   */
+  void registerNodeOperationHook(UIManagerNodeOperationHook& nodeOperationHook);
+  void unregisterNodeOperationHook(
+      UIManagerNodeOperationHook& nodeOperationHook);
 
   ShadowNode::Shared getNewestCloneOfShadowNode(
       const ShadowNode& shadowNode) const;
@@ -229,6 +237,9 @@ class UIManager final : public ShadowTreeDelegate {
 
   mutable std::shared_mutex mountHookMutex_;
   mutable std::vector<UIManagerMountHook*> mountHooks_;
+
+  mutable std::shared_mutex nodeOperationHookMutex_;
+  mutable std::vector<UIManagerNodeOperationHook*> nodeOperationHooks_;
 
   std::unique_ptr<LeakChecker> leakChecker_;
 
