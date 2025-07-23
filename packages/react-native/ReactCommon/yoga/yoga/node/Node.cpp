@@ -159,7 +159,7 @@ void Node::setConfig(yoga::Config* config) {
       config->useWebDefaults() == config_->useWebDefaults(),
       "UseWebDefaults may not be changed after constructing a Node");
 
-  if (yoga::configUpdateInvalidatesLayout(*config_, *config)) {
+  if (yoga::configUpdateInvalidatesLayout(nodeType_, *config_, *config)) {
     markDirtyAndPropagate();
     layout_.configVersion = 0;
   } else {

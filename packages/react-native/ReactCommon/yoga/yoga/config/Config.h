@@ -13,6 +13,7 @@
 #include <yoga/enums/Errata.h>
 #include <yoga/enums/ExperimentalFeature.h>
 #include <yoga/enums/LogLevel.h>
+#include <yoga/enums/NodeType.h>
 
 // Tag struct used to form the opaque YGConfigRef for the public C API
 struct YGConfig {};
@@ -27,6 +28,7 @@ using ExperimentalFeatureSet = std::bitset<ordinalCount<ExperimentalFeature>()>;
 // Whether moving a node from an old to new config should dirty previously
 // calculated layout results.
 bool configUpdateInvalidatesLayout(
+    NodeType nodeType,
     const Config& oldConfig,
     const Config& newConfig);
 
@@ -49,6 +51,9 @@ class YG_EXPORT Config : public ::YGConfig {
 
   void setPointScaleFactor(float pointScaleFactor);
   float getPointScaleFactor() const;
+
+  void setFontSizeMultiplier(float fontSizeMultiplier);
+  float getFontSizeMultiplier() const;
 
   void setContext(void* context);
   void* getContext() const;
@@ -78,6 +83,7 @@ class YG_EXPORT Config : public ::YGConfig {
   ExperimentalFeatureSet experimentalFeatures_{};
   Errata errata_ = Errata::None;
   float pointScaleFactor_ = 1.0f;
+  float fontSizeMultiplier_ = 1.0f;
   void* context_ = nullptr;
 };
 
